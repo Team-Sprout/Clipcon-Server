@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import sprout.clipcon.server.model.Group;
+
 /* maxFileSize: 최대 파일 크기(100MB)
  * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
  * maxRequestSize:  */
@@ -29,7 +31,7 @@ public class UploadServlet extends HttpServlet {
 	// // 업로드 파일을 저장할 위치
 	// private final String UPLOAD_DIRECTORY =
 	// "C:\\Users\\Administrator\\Desktop\\primaryRoomKey";
-
+	private Server server = Server.getInstance();
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("doGet()");
@@ -40,7 +42,6 @@ public class UploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// 요청받은 http request 내용 출력
 		requestMsgLog(request);
-
 		Part filePart = null;
 
 		// 여러 file들을 가져옴
@@ -173,5 +174,10 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("===========================================");
 		System.out.println();
 		System.out.println();
+	}
+	/**@author delf*/
+	public void Example() {
+		Group targetGroup = server.getGroupByPrimaryKey("그룹키");
+		
 	}
 }

@@ -57,12 +57,12 @@ public class UserController {
 
 		case Message.REQUEST_CREATE_GROUP:
 			group = server.createGroup("그룹 이름");	// 해당 이름으로 그룹 생성
-			group.addUser(user, this);		// 그 그룹에 참여
+			group.addUser(user.getEmail(), this);		// 그 그룹에 참여
 			break;
 
 		case Message.REQUEST_JOIN_GROUP:
 			group = server.getGroupByPrimaryKey("그룹고유키");
-			group.addUser(user, this);
+			group.addUser(user.getEmail(), this);
 			break;
 
 		default:
