@@ -32,6 +32,9 @@ public class UploadServlet extends HttpServlet {
 	// private final String UPLOAD_DIRECTORY =
 	// "C:\\Users\\Administrator\\Desktop\\primaryRoomKey";
 	private Server server = Server.getInstance();
+	private String userEmail = null;
+	private String groupPK = null;
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("doGet()");
@@ -42,6 +45,10 @@ public class UploadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// 요청받은 http request 내용 출력
 		requestMsgLog(request);
+		userEmail = request.getParameter("userEmail");
+		groupPK = request.getParameter("groupPK");
+		System.out.println("userEmail: " + userEmail + ", groupPK: " + groupPK);
+
 		Part filePart = null;
 
 		// 여러 file들을 가져옴
