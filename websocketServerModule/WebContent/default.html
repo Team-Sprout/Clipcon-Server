@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>WebSocket Tutorial 03</title>
+	</head>
+	<body>
+		<textarea id="messages" readonly="readonly" rows="10" cols="45"></textarea><br/>
+		<input id="message" type="text" size="50" />
+		<input type="button" value="Send" onclick="send()" />
+		<script type="text/javascript">
+			var webSocket = new WebSocket('ws://localhost:8080/WebSocketPrj03/chatServerEndpoint');
+			webSocket.onmessage = function processMessage(chatMessage) {
+				var json = JSON.parse(chatMessage.data);
+				document.getElementById('messages').value += json.name +': '+json.message + '\n';
+			}
+			function send() {
+				var message = document.getElementById('message');
+				webSocket.send(JSON.stringify({'message' : message.value}));
+				message.value = "";
+			}
+		    window.onbeforeunload = function doSomething() {
+		    	webSocket.onclose = function () {}; 
+		        webSocket.close();
+		    };
+		</script>
+	</body>
+</html>
