@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.websocket.EncodeException;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import sprout.clipcon.server.controller.Server;
 import sprout.clipcon.server.controller.UserController;
@@ -15,10 +16,11 @@ import sprout.clipcon.server.model.message.Message;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class Group {
 	private String primaryKey;
 	private String name;
-	private Server server = Server.getInstance();
+	// private Server server = Server.getInstance();
 	public Map<String, UserController> users = Collections.synchronizedMap(new HashMap<String, UserController>());
 
 	public Group(String primaryKey, String name) {
@@ -42,4 +44,11 @@ public class Group {
 		return users.get(email).getUser();
 	}
 
+	public Map<String, String> getUserList() {
+		Map<String, String> list = new HashMap<String, String>();
+		for (String key : users.keySet()) {
+			list.put(key, users.get(key).getUser().getName());
+		}
+		return list;
+	}
 }
