@@ -1,10 +1,13 @@
 package sprout.clipcon.server.controller;
 
+import java.awt.geom.GeneralPath;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.User;
@@ -14,6 +17,8 @@ public class Server {
 	private MemberAdministrator MemberAdministrator = new MemberAdministrator();
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());	// 서버 내 존재한는 그룹
 	private Set<User> userOnLobby = Collections.synchronizedSet(new HashSet<User>());				// 그룹에 참여하지 않은 접속 중인 사용자
+	
+	public Group testGroup = new Group("##", "test group");
 
 	private Server() {
 	}
@@ -57,6 +62,49 @@ public class Server {
 	}
 
 	private String generatePrimaryKey() {
-		return "";
+		StringBuffer temp = new StringBuffer();
+		Random rnd = new Random();
+		for (int i = 0; i < 20; i++) {
+		    int rIndex = rnd.nextInt(3);
+		    switch (rIndex) {
+		    case 0:
+		        // a-z
+		        temp.append((char) ((int) (rnd.nextInt(26)) + 97));
+		        break;
+		    case 1:
+		        // A-Z
+		        temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+		        break;
+		    case 2:
+		        // 0-9
+		        temp.append((rnd.nextInt(10)));
+		        break;
+		    }
+		}
+		return temp.toString();
+	
+	}
+	
+	public static void main(String[] args) {
+		StringBuffer temp = new StringBuffer();
+		Random rnd = new Random();
+		for (int i = 0; i < 6; i++) {
+		    int rIndex = rnd.nextInt(3);
+		    switch (rIndex) {
+		    case 0:
+		        // a-z
+		        temp.append((char) ((int) (rnd.nextInt(26)) + 97));
+		        break;
+		    case 1:
+		        // A-Z
+		        temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+		        break;
+		    case 2:
+		        // 0-9
+		        temp.append((rnd.nextInt(10)));
+		        break;
+		    }
+		}
+		
 	}
 }
