@@ -47,9 +47,9 @@ public class UserController {
 		case "sign in":
 			String email = incomingMessage.get(Message.EMAIL);
 			String name = incomingMessage.get("password");
+			
 			String result = MemberAdministrator.getUserAuthentication(email, name);
 			if (result.equals(MemberAdministrator.CONFIRM)) { // 서버: 승인
-				System.out.println("if in");
 				server = Server.getInstance();	// 서버 객체 할당
 				user = MemberAdministrator.getUserByEmail("사용자 이메일");
 				server.enterUserInLobby(user);			// 서버에 사용자 입장

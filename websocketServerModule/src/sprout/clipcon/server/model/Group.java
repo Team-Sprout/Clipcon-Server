@@ -10,7 +10,6 @@ import javax.websocket.EncodeException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import sprout.clipcon.server.controller.Server;
 import sprout.clipcon.server.controller.UserController;
 import sprout.clipcon.server.model.message.Message;
 
