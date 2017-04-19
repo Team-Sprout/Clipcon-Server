@@ -21,12 +21,13 @@ public class Contents {
 
 	private String uploadUserName;
 	private String uploadTime;
-	
-	//String Type: String값, File Type: FileOriginName
+
+	// String Type: String값, File Type: FileOriginName
 	private String contentsValue;
 
 	/** 생성 시 고유키값을 할당한다. */
 	public Contents() {
 		this.contentsPKName = Integer.toString(++contentsPKValue);
+		System.out.println("Contents 생성자 호출, ++contentsPKValue");
 	}
 }

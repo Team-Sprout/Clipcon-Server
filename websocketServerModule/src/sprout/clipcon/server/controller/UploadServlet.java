@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -30,9 +29,6 @@ import sprout.clipcon.server.model.Contents;
 /* maxFileSize: 최대 파일 크기(100MB)
  * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
  * maxRequestSize:  */
-
-//@MultipartConfig(location = "C:\\Users\\Administrator\\Desktop\\heeuploads", maxFileSize = 1024 * 1024
-//		* 100, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 100)
 @MultipartConfig(maxFileSize = 1024 * 1024 * 100, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 100)
 @WebServlet("/UploadServlet")
 public class UploadServlet extends HttpServlet {
@@ -61,16 +57,15 @@ public class UploadServlet extends HttpServlet {
 		userEmail = request.getParameter("userEmail");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = request.getParameter("uploadTime");
-		System.out.println("userEmail: " + userEmail + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime);
+		System.out.println(
+				"<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime);
 		System.out.println();
-
-		// Part filePart = null;
 
 		// 여러 file들을 가져옴
 		for (Part part : request.getParts()) {
 
 			String partName = part.getName();
-			Contents uploadContents = new Contents();
+			Contents uploadContents;
 
 			/*
 			 * To find out file name, parse header value of content-disposition
@@ -85,31 +80,31 @@ public class UploadServlet extends HttpServlet {
 
 			switch (partName) {
 			case "stringData":
+				uploadContents = new Contents();
 				String paramValue = getStringFromStream(part.getInputStream());
-				System.out.println("paramValue: " + paramValue);
+				System.out.println("stringData: " + paramValue);
 
-				setContentsInfo(uploadContents, Contents.TYPE_STRING, part.getSize(), paramValue);
-				saveContentsToHidtory(uploadContents);
+				setContentsInfo(uploadContents, part.getSize(), Contents.TYPE_STRING, paramValue);
 
 				break;
 			case "imageData":
+				uploadContents = new Contents();
 				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
 						uploadContents.getContentsPKName());
-				System.out.println(imageData.toString());
+				System.out.println("imageData: " + imageData.toString());
 
-				setContentsInfo(uploadContents, Contents.TYPE_IMAGE, part.getSize(), null);
-				saveContentsToHidtory(uploadContents);
+				setContentsInfo(uploadContents, part.getSize(), Contents.TYPE_IMAGE, null);
+				saveContentsToHistory(uploadContents);
 
 				break;
 			case "multipartFileData":
+				uploadContents = new Contents();
 				String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
 				System.out.println("fileName: " + fileName);
 
-				setContentsInfo(uploadContents, Contents.TYPE_FILE, part.getSize(), fileName);
-				saveContentsToHidtory(uploadContents);
+				setContentsInfo(uploadContents, part.getSize(), Contents.TYPE_FILE, fileName);
+				saveContentsToHistory(uploadContents);
 
-				// filePart = part; // Absolute path doesn't work.
-				// filePart.write(fileName);
 				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
 				getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				break;
@@ -118,6 +113,7 @@ public class UploadServlet extends HttpServlet {
 			}
 			System.out.println();
 		}
+
 		responseMsgLog(response);
 	}
 
@@ -147,6 +143,8 @@ public class UploadServlet extends HttpServlet {
 	public Image getImageDataStream(InputStream stream, String groupPK, String imagefileName) throws IOException {
 		byte[] imageInByte;
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+
+		createFileReceiveFolder(saveFilePath); // 그룹 폴더 존재 확인
 
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
 			byte[] buffer = new byte[0xFFFF]; // 65536
@@ -230,17 +228,25 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	/** Contents에 대한 정보 Setting */
-	private void setContentsInfo(Contents uploadContents, String contentsType, long contentsSize,
+	private void setContentsInfo(Contents uploadContents, long contentsSize, String contentsType,
 			String contentsValue) {
-		uploadContents.setContentsType(contentsType);
+		System.out.println("<contentsPKName>: " + uploadContents.contentsPKName);
 		uploadContents.setContentsSize(contentsSize);
 		uploadContents.setUploadUserName(userEmail);
 		uploadContents.setUploadTime(uploadTime);
+		System.out.println("<CommonSetting> ContentsSize: " + uploadContents.getContentsSize() + ", UploadUserName: "
+				+ uploadContents.getUploadUserName() + ", UploadTime: " + uploadContents.getUploadTime());
+
+		uploadContents.setContentsType(contentsType);
 		uploadContents.setContentsValue(contentsValue);
+		System.out.println("<UniqueSetting> contentsType: " + uploadContents.getContentsType() + ", contentsValue: "
+				+ uploadContents.getContentsValue());
+
+		// saveContentsToHistory(uploadContents);
 	}
 
 	/** 해당 그룹 history에 contents 저장 */
-	private void saveContentsToHidtory(Contents uploadContents) {
+	private void saveContentsToHistory(Contents uploadContents) {
 		// 해당 그룹의 history를 가져온다.
 
 		// content를 저장한다.
