@@ -1,22 +1,23 @@
 package sprout.clipcon.server.controller;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import sprout.clipcon.server.model.Contents;
 
 /**
  * Servlet implementation class DownloadServlet
@@ -25,9 +26,16 @@ import javax.servlet.http.HttpServletResponse;
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	// 파일을 저장되어있는 root location
+	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
+
+	private static final int CHUNKSIZE = 4096;
+	private static final String LINE_FEED = "\r\n";
+	private String charset = "UTF-8";
+
 	private String userEmail = null;
 	private String groupPK = null;
-	private String downloadData = null;
+	private String downloadDataPK = null;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -42,79 +50,95 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		requestMsgLog(request);
 
 		// get Request Data
-		downloadData = request.getParameter("downloadData");
+		userEmail = request.getParameter("userEmail");
+		groupPK = request.getParameter("groupPK");
+		downloadDataPK = request.getParameter("downloadDataPK");
+		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", downloadDataPK: "
+				+ downloadDataPK);
+		System.out.println();
 
-		// 서버
+		// 서버에서 groupPK로 해당 history에서 downloadDataPK인 Contents를 찾는다.
+		/* test를 위한 setting */
+		Contents testcontent = new Contents();
 
-		// Copy it to response's OutputStream
+		/* File의 경우 */
+		// testcontent.setContentsPKName("2");
+		// testcontent.setContentsSize(80451275);
+		// testcontent.setContentsType(Contents.TYPE_FILE);
+		// testcontent.setContentsValue("taeyeon.mp3");
+		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
+		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
 
-		// Set response Headers
-		response.setContentType("multipart/mixed");
-		response.setHeader("Content-Disposition", "attachment; filename=");
+		// testcontent.setContentsPKName("3");
+		// testcontent.setContentsSize(387);
+		// testcontent.setContentsType(Contents.TYPE_FILE);
+		// testcontent.setContentsValue("bbbb.jpeg");
+		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
+		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
 
-		//
-		// // Set the response type and specify the boundary string
-		// response.setContentType("multipart/x-mixed-replace;boundary=END");
-		//
-		// // Set the content type based on the file type you need to download
-		// String contentType = "Content-type: text/rtf";
-		//
-		// // List of files to be downloaded
-		// List files = new ArrayList();
-		// files.add(new File("C:/first.txt"));
-		// files.add(new File("C:/second.txt"));
-		// files.add(new File("C:/third.txt"));
-		//
-		// ServletOutputStream out = response.getOutputStream();
-		//
-		// // Print the boundary string
-		// out.println();
-		// out.println("--END");
-		//
-		// for (File file : files) {
-		//
-		// // Get the file
-		// FileInputStream fis = null;
-		// try {
-		// fis = new FileInputStream(file);
-		//
-		// } catch (FileNotFoundException fnfe) {
-		// // If the file does not exists, continue with the next file
-		// System.out.println("Couldfind file " + file.getAbsolutePath());
-		// continue;
-		// }
-		//
-		// BufferedInputStream fif = new BufferedInputStream(fis);
-		//
-		// // Print the content type
-		// out.println(contentType);
-		// out.println("Content-Disposition: attachment; filename=" +
-		// file.getName());
-		// out.println();
-		//
-		// System.out.println("Sending " + file.getName());
-		//
-		// // Write the contents of the file
-		// int data = 0;
-		// while ((data = fif.read()) != -1) {
-		// out.write(data);
-		// }
-		// fif.close();
-		//
-		// // Print the boundary string
-		// out.println();
-		// out.println("--END");
-		// out.flush();
-		// System.out.println("Finisheding file " + file.getName());
-		// }
-		//
-		// // Print the ending boundary string
-		// out.println("--END--");
-		// out.flush();
-		// out.close();
+		/* String의 경우 */
+		testcontent.setContentsPKName("1");
+		testcontent.setContentsSize(45);
+		testcontent.setContentsType(Contents.TYPE_STRING);
+		testcontent.setContentsValue("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		testcontent.setUploadTime("2017-4-19 날짜 10:53:06");
+		testcontent.setUploadUserName("gmlwjd9405@naver.com");
 
+		/* Image의 경우 */
+		// testcontent.setContentsPKName("1");
+		// testcontent.setContentsSize(4733);
+		// testcontent.setContentsType(Contents.TYPE_IMAGE);
+		// testcontent.setContentsValue("");
+		// testcontent.setUploadTime("2017-4-19 날짜 11:06:04");
+		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+
+		String contentsType = testcontent.getContentsType();
+
+		// 해당 downloadDataPK의 Contents타입을 client에 알림
+		// response.setHeader("contentsType", "");
+
+		// 해당 downloadDataPK의 Contents타입에 따라 다르게 처리(Set response Headers)
+		switch (contentsType) {
+		case "STRING":
+			String stringData = testcontent.getContentsValue();
+
+			response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
+			response.setContentType("text/plain; charset=UTF-8");
+
+			sendStringData(stringData, response.getOutputStream());
+
+			break;
+		case "IMAGE":
+			String imageFileName = testcontent.getContentsPKName();
+
+			response.setContentType("image/jpeg");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
+			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+
+			// dir에 있는 image file을 가져와 전송. (ByteArrayStream)
+			sendFileData(imageFileName, response.getOutputStream());
+
+			break;
+		case "FILE":
+			String fileName = testcontent.getContentsPKName();
+
+			// response.setContentType("multipart/mixed");
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
+			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+
+			// dir에 있는 file을 가져와 전송. (FileStream)
+			sendFileData(fileName, response.getOutputStream());
+
+			break;
+		default:
+			System.out.println("어떤 형식에도 속하지 않음.");
+		}
+
+		// responseMsgLog(response);
 	}
 
 	/**
@@ -125,6 +149,82 @@ public class DownloadServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// doGet(request, response);
+	}
+
+	/** String Data 전송 */
+	public void sendStringData(String stringData, OutputStream outputStream) {
+		try {
+
+			PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
+
+			writer.append(stringData).append(LINE_FEED);
+			writer.flush();
+			writer.close();
+
+			outputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Captured Image Data, File Data를 전송 */
+	public void sendFileData(String fileName, OutputStream outputStream) {
+		// 보낼 file data를 가져오기
+		File sendFileContents = new File(ROOT_LOCATION + groupPK + "\\" + fileName);
+
+		try {
+			FileInputStream inputStream = new FileInputStream(sendFileContents);
+			byte[] buffer = new byte[CHUNKSIZE];
+			int bytesRead = -1;
+
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			outputStream.flush();
+			inputStream.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** 여러 File Data를 전송(자료 조사 필요) */
+	public void sendMultipartData(ArrayList<String> fileFullPathList) {
+		//
+		// try {
+		// MultipartUtility multipart = new MultipartUtility(SERVER_URL +
+		// SERVER_SERVLET, charset);
+		// setCommonParameter(multipart);
+		//
+		// // Iterator 통한 전체 조회
+		// Iterator iterator = fileFullPathList.iterator();
+		//
+		// // 여러 파일을 순서대로 처리
+		// while (iterator.hasNext()) {
+		// String fileFullPath = (String) iterator.next();
+		//
+		// System.out.println("fileFullPathList: " + fileFullPath);
+		// System.out.println();
+		//
+		// // 업로드할 파일 생성
+		// File uploadFile = new File(fileFullPath);
+		//
+		// /* uploadFilename is the name of the sequence input variable in the
+		// called project the value is the name that will be given to the file
+		// */
+		// multipart.addFilePart("multipartFileData", uploadFile);
+		// }
+		//
+		// List<String> response = multipart.finish();
+		// System.out.println("SERVER REPLIED");
+		// // responseMsgLog();
+		//
+		// for (String line : response) {
+		// System.out.println(line);
+		// }
+		// } catch (IOException ex) {
+		// System.err.println(ex);
+		// }
 	}
 
 	/** request Msg 출력 */
