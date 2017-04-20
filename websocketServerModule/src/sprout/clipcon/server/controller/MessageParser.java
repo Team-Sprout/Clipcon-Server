@@ -79,22 +79,15 @@ public class MessageParser {
 			// User tmpUser = new User(email, tmpJson.getString(Message.NAME));
 			users.put(email, name);
 		}
-
-		// for (String key : users.keySet()) {
-		// System.out.println(key + " " + users.get(key));
-		// }
-
 		return addressBook;
 	}
 
 	public static Message getMessageByUser(User user) {
 		Message message = new Message().setType(Message.USER_INFO); // 반환할 객체, 타입은 '유저정보'
-
 		message.add(Message.NAME, user.getName());// name 삽입
-
 		return message;
 	}
-//{"group pk":"godoy","message type":"request/join group"}
+	
 	public static Message getMessageByGroup(Message message, Group group) {
 		message.add(Message.GROUP_PK, group.getPrimaryKey());
 		List<String> userList = group.getUserList();

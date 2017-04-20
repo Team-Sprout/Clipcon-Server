@@ -59,7 +59,7 @@ public class UserController {
 
 		case Message.REQUEST_JOIN_GROUP:
 			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey("godoy");	 // 그룹키에 해당하는 객체 추출
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	 // 그룹키에 해당하는 객체 추출
 			// group = server.getGroupByPrimaryKey(incomingMessage.get("groupPK")); // 그룹키에 해당하는 객체 추출
 			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP);
 
@@ -68,6 +68,11 @@ public class UserController {
 				userName = group.addUser(session.getId(), this);
 				responseMsg.add(Message.NAME, userName);
 				MessageParser.getMessageByGroup(responseMsg, group);// 그룹 정보를 포함하는 Message 객체 생성
+				
+				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);
+				noti.add(Message.ADDED_PARTICIPANT_NAME, userName);
+				group.send(userName, noti);
+				
 			} else {
 				responseMsg.add(Message.RESULT, Message.REJECT);
 			}

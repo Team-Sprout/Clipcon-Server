@@ -78,6 +78,8 @@ public class Message {
 
 	public final static String RESPONSE_CREATE_GROUP = "response/create group";
 	public final static String RESPONSE_JOIN_GROUP = "response/join group";
+	
+	public final static String NOTI_ADD_PARTICIPANT = "noti/add participant";
 
 	public final static String RESULT = "result";
 	public final static String CONFIRM = "confirm";
@@ -93,4 +95,6 @@ public class Message {
 	public final static String USER_INFO = "user information";
 	public final static String GROUP_INFO = "group information";
 	public final static String TEST_DEBUG_MODE = "debug";
+	
+	public final static String ADDED_PARTICIPANT_NAME = "added participant name";
 }

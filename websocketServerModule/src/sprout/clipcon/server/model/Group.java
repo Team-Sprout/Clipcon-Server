@@ -28,9 +28,11 @@ public class Group {
 		this.primaryKey = primaryKey;
 	}
 
-	public void send(Message message) throws IOException, EncodeException {
+	public void send(String user, Message message) throws IOException, EncodeException {
+		System.out.println("그룹 전체에게 보내다.");
 		for (String key : users.keySet()) {
-			System.out.println(key);
+			if (key.equals(user))
+				continue;
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
 	}
@@ -53,7 +55,7 @@ public class Group {
 		}
 		return list;
 	}
-	
+
 	public String getTmepUsername() {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
@@ -72,7 +74,7 @@ public class Group {
 		}
 		return temp.toString();
 	}
-	
+
 	public int getSize() {
 		return users.size();
 	}
