@@ -1,6 +1,8 @@
 package sprout.clipcon.server.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -18,7 +20,6 @@ public class MessageParser {
 	 * @return message 로부터 변환된 User객체 */
 	public static User getUserByMessage(Message message) {
 		User user = new User(); // 반환할 객체
-		user.setEmail(message.get(Message.EMAIL));	// User객체에 email 삽입
 		user.setName(message.get(Message.NAME));	// User객체에 name 삽입
 
 		// user에 삽입할 AddressBook객체 생성
@@ -28,7 +29,6 @@ public class MessageParser {
 		// message에서 JSONObject추출
 		JSONObject jsonMsg = message.getJson();
 		JSONArray array = jsonMsg.getJSONArray(Message.LIST);
-
 		Iterator<?> it = array.iterator();
 		while (it.hasNext()) {
 			JSONObject tmpJson = (JSONObject) it.next();
@@ -36,9 +36,34 @@ public class MessageParser {
 			String name = tmpJson.getString(Message.NAME);
 			users.put(email, name);
 		}
-		user.setAddressBook(addressBook);
 		return user;
 	}
+
+//	public static User getUserAndGroupByMessage(Message message) {
+//		User user = new User(message.get(Message.NAME));
+//		Group group = new Group(message.get(Message.GROUP_PK));
+//
+//		// group.setName(name);
+//		
+//		List<String> userStringList = new ArrayList<String>();
+//		JSONArray tmpArray = message.getJson().getJSONArray(Message.LIST);
+//		Iterator<?> it = tmpArray.iterator();
+//		while (it.hasNext()) {
+//			JSONObject tmpJson = (JSONObject) it.next();
+//			userStringList.add(tmpJson.getString(Message.NAME));
+//		}
+//		
+//
+//		List<User> userList = new ArrayList<User>();
+//		for (String userName : userStringList) {
+//			userList.add(new User(userName));
+//		}
+//
+//		group.setUserList(userList);
+//		user.setGroup(group);
+//
+//		return user;
+//	}
 
 	public static AddressBook getAddressBookByMessage(Message message) {
 		AddressBook addressBook = new AddressBook();
@@ -55,80 +80,38 @@ public class MessageParser {
 			users.put(email, name);
 		}
 
-		for (String key : users.keySet()) {
-			System.out.println(key + " " + users.get(key));
-		}
+		// for (String key : users.keySet()) {
+		// System.out.println(key + " " + users.get(key));
+		// }
 
 		return addressBook;
-	}
-
-	public static Message getMeessageByAddressBook(AddressBook addressBook) {
-		Map<String, String> users = addressBook.getUsers();
-		Message message = new Message().setType(Message.ADDRESS_BOOK);
-
-		JSONArray array = new JSONArray();
-		for (String key : users.keySet()) {
-			JSONObject tmp = new JSONObject();
-			tmp.put(Message.EMAIL, users.get(key));
-			tmp.put(Message.NAME, users.get(key));
-			array.put(tmp);
-		}
-		message.getJson().put(Message.LIST, array);
-		return message;
 	}
 
 	public static Message getMessageByUser(User user) {
 		Message message = new Message().setType(Message.USER_INFO); // 반환할 객체, 타입은 '유저정보'
 
-		message.add(Message.EMAIL, user.getEmail());	// email 삽입
-		message.add(Message.NAME, user.getName());		// name 삽입
-
-		// Json으로 변환할 주소록 Map
-		Map<String, String> users = user.getAddressBook().getUsers();
-		// 주소록 내용 담을 JsonArray
-		JSONArray array = new JSONArray();
-		// array에 주소록 내용 삽입
-		for (String key : users.keySet()) {
-			JSONObject tmp = new JSONObject();
-			tmp.put(Message.EMAIL, users.get(key));
-			tmp.put(Message.NAME, users.get(key));
-			array.put(tmp);
-		}
-		// array를 message에 삽입
-		message.getJson().put(Message.LIST, array);
+		message.add(Message.NAME, user.getName());// name 삽입
 
 		return message;
 	}
+//{"group pk":"godoy","message type":"request/join group"}
+	public static Message getMessageByGroup(Message message, Group group) {
+		message.add(Message.GROUP_PK, group.getPrimaryKey());
+		List<String> userList = group.getUserList();
+		System.out.println("list size: " + userList.size());
 
-	public static Message AddUserInfoToMessage(Message message, User user) {
-		message.add(Message.EMAIL, user.getEmail());	// email 삽입
-		message.add(Message.NAME, user.getName());		// name 삽입
-
-		// Json으로 변환할 주소록 Map
-		Map<String, String> users = user.getAddressBook().getUsers();
-		// 주소록 내용 담을 JsonArray
 		JSONArray array = new JSONArray();
-		// array에 주소록 내용 삽입
-		for (String key : users.keySet()) {
-			System.out.println("만드는 중");
-			JSONObject tmp = new JSONObject();
-			tmp.put(Message.EMAIL, users.get(key));
-			tmp.put(Message.NAME, users.get(key));
-			array.put(tmp);
+		Iterator<String> it = userList.iterator();
+		while (it.hasNext()) {
+			array.put(it.next());
 		}
-		// array를 message에 삽입
-		message.getJson().put(Message.LIST, array);
-		System.out.println(message);
+		message.add(Message.LIST, array);
 		return message;
+		// TODO:
 	}
 
-	public static Message getMessageByGroup(Group group) {
-		Message message = new Message().setType(Message.GROUP_INFO);
-		message.add("groupkey", group.getPrimaryKey());
-		message.add("groupname", group.getName());
-		message.add("list", group.getUserList());
-
-		return message;
+	public static Message appendMessageByGroup(Message message, Group group) {
+		return new Message();
 	}
 
 	// public static Group getGroupByMessage(Message message) {
@@ -144,26 +127,33 @@ public class MessageParser {
 
 	public static void main(String[] args) {
 
-		AddressBook ab = new AddressBook();
-		Map<String, String> users = ab.getUsers();
+		List<String> list = new ArrayList<String>();
+		list.add("em1");
+		list.add("em2");
+		list.add("em3");
+		list.add("em4");
 
-		users.put("em1", "n1");
-		users.put("em2", "n2");
-		users.put("em3", "n3");
-		users.put("em5", "n5");
+		Group tmpGroup = new Group();
+		tmpGroup.setPrimaryKey("##");
 
-		User tmp = new User("abab", "1212");
-		tmp.setAddressBook(ab);
-		Message tmpMessage = getMessageByUser(tmp);
-		User tmpUser = getUserByMessage(tmpMessage);
-		System.out.println(tmpUser.getName());
-		System.out.println(tmpUser.getEmail());
+		Message tmpMessage = new Message().setType(Message.TEST_DEBUG_MODE);
 
-		System.out.println("주소록 출력");
-		Map<String, String> tmpMap = tmpUser.getAddressBook().getUsers();
-		for (String key : tmpMap.keySet()) {
-			System.out.println(key + " " + tmpMap.get(key));
+		JSONArray array = new JSONArray();
+		Iterator<?> it = list.iterator();
+		while (it.hasNext()) {
+			array.put(it.next());
 		}
+		tmpMessage.add(Message.LIST, array);
+		System.out.println(tmpMessage);
+	}
+
+	public List<String> createTestList() {
+		List<String> list = new ArrayList<String>();
+		list.add("em1");
+		list.add("em2");
+		list.add("em3");
+		list.add("em4");
+		return list;
 	}
 
 }

@@ -14,15 +14,11 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class User {
-	private String email;
 	private String name;
 	private Group group;
-	private String status;
-	private AddressBook addressBook = new AddressBook();
 	private Session session;
 
 	public User(String email, String name) {
-		this.email = email;
 		this.name = name;
 	}
 }
