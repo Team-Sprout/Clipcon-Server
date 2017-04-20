@@ -22,6 +22,7 @@ public class Message {
 	}
 
 	public Message setJson(JSONObject json) {
+		this.json = json; // XXX: 바꿀 필요 있을수도 있음
 		type = json.getString(TYPE);
 		return this;
 	}
@@ -86,7 +87,9 @@ public class Message {
 	public final static String REJECT = "reject";
 
 	public final static String GROUP_PK = "group pk";
-
+	
+	public final static String GROUP_NAME = "group name";
+	
 	public final static String EMAIL = "email";
 	public final static String NAME = "name";
 	public final static String CONTENTS = "contents";

@@ -1,6 +1,7 @@
 package sprout.clipcon.server.controller;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -11,6 +12,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import lombok.Getter;
+import sprout.clipcon.server.model.AddressBook;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.User;
 import sprout.clipcon.server.model.message.ChatMessageDecoder;
@@ -76,12 +78,6 @@ public class UserController {
 			} else {
 				responseMsg.add(Message.RESULT, Message.REJECT);
 			}
-			break;
-
-		case Message.TEST_DEBUG_MODE:
-			server = Server.getInstance();	// 서버 객체 할당
-			// server.testGroup.addUser(incomingMessage.get(Message.EMAIL), session);
-
 			break;
 
 		default:
