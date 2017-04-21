@@ -64,6 +64,8 @@ public class DownloadServlet extends HttpServlet {
 		/* test를 위한 setting */
 		Contents testcontent = new Contents();
 
+		//영재 선생님
+		
 		/* File의 경우 */
 		// testcontent.setContentsPKName("2");
 		// testcontent.setContentsSize(80451275);
