@@ -1,4 +1,4 @@
-package sprout.clipcon.server.controller;
+ package sprout.clipcon.server.controller;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -32,7 +32,7 @@ import sprout.clipcon.server.model.Group;
 /* maxFileSize: 최대 파일 크기(100MB)
  * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
  * maxRequestSize:  */
-@MultipartConfig(maxFileSize = 1024 * 1024 * 100, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 100)
+@MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
 public class UploadServlet extends HttpServlet {
 
@@ -44,7 +44,7 @@ public class UploadServlet extends HttpServlet {
 	// 업로드한 파일을 저장할 폴더
 	private File receiveFolder;
 
-	private String userEmail = null;
+	private String userName = null;
 	private String groupPK = null;
 	private String uploadTime = null;
 
@@ -58,10 +58,10 @@ public class UploadServlet extends HttpServlet {
 
 		requestMsgLog(request);
 
-		userEmail = request.getParameter("userEmail");
+		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = request.getParameter("uploadTime");
-		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
+		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
 
 		for (Part part : request.getParts()) {
 
@@ -82,14 +82,14 @@ public class UploadServlet extends HttpServlet {
 			switch (partName) {
 			case "stringData":
 				String paramValue = getStringFromStream(part.getInputStream());
-				uploadContents = new Contents(Contents.TYPE_STRING, userEmail, uploadTime, part.getSize());
+				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
 				System.out.println("stringData: " + paramValue);
 				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
 				break;
 
 			case "imageData":
-				uploadContents = new Contents(Contents.TYPE_IMAGE, userEmail, uploadTime, part.getSize());
+				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName()); // XXX: 이것은 무엇인가?
 				System.out.println("imageData: " + imageData.toString());
 
@@ -100,7 +100,7 @@ public class UploadServlet extends HttpServlet {
 			// 여러 file들을 가져옴
 			case "multipartFileData":
 				String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
-				uploadContents = new Contents(Contents.TYPE_FILE, userEmail, uploadTime, part.getSize());
+				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(fileName);
 				System.out.println("fileName: " + fileName);
 
@@ -113,10 +113,10 @@ public class UploadServlet extends HttpServlet {
 			}
 			System.out.println();
 		}
-
+		System.out.println("서블릿 끝");
 		responseMsgLog(response);
 	}
-
+	
 	/** String Data를 수신하는 Stream */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
@@ -231,7 +231,7 @@ public class UploadServlet extends HttpServlet {
 	private void setContentsInfo(Contents uploadContents, long contentsSize, String contentsType, String contentsValue) {
 		System.out.println("<contentsPKName>: " + uploadContents.contentsPKName);
 		uploadContents.setContentsSize(contentsSize);
-		uploadContents.setUploadUserName(userEmail);
+		uploadContents.setUploadUserName(userName);
 		uploadContents.setUploadTime(uploadTime);
 		System.out.println("<CommonSetting> ContentsSize: " + uploadContents.getContentsSize() + ", UploadUserName: " + uploadContents.getUploadUserName() + ", UploadTime: " + uploadContents.getUploadTime());
 
@@ -281,7 +281,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("Request RemoteUser: " + request.getRemoteUser());
 
 		System.out.println("==================ENTITY====================");
-		System.out.println("userEmail: " + request.getParameter("userEmail"));
+		System.out.println("userName: " + request.getParameter("userName"));
 		System.out.println("groupPK: " + request.getParameter("groupPK"));
 		System.out.println("downloadDataPK: " + request.getParameter("downloadDataPK"));
 		System.out.println("===========================================");

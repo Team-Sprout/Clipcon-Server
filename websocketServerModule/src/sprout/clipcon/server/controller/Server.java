@@ -17,6 +17,17 @@ public class Server {
 	private Server() {
 		Group testGroup = new Group("godoy");
 		groups.put("godoy", testGroup);
+
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int i = 0;
+				while (true) {
+
+					System.out.println(Thread.currentThread().getName() + " " + i++);
+				}
+			}
+		}).start();
 	}
 
 	public static Server getInstance() {
