@@ -24,6 +24,13 @@ public class Contents {
 
 	// String Type: String값, File Type: FileOriginName
 	private String contentsValue;
+	
+	public Contents(String type, String userEmail, String time, long size) {
+		this.contentsType = type;
+		this.uploadUserName = userEmail;
+		this.uploadTime = time;
+		this.contentsSize = size;
+	}
 
 	/** 생성 시 고유키값을 할당한다. */
 	public Contents() {

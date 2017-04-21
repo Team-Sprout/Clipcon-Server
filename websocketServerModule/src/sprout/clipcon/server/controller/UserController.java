@@ -1,6 +1,7 @@
 package sprout.clipcon.server.controller;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -11,19 +12,22 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import lombok.Getter;
+import sprout.clipcon.server.model.AddressBook;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.User;
 import sprout.clipcon.server.model.message.ChatMessageDecoder;
 import sprout.clipcon.server.model.message.ChatMessageEncoder;
 import sprout.clipcon.server.model.message.Message;
+import sprout.clipcon.server.model.message.MessageParser;
 
 @Getter
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { ChatMessageEncoder.class }, decoders = { ChatMessageDecoder.class })
 public class UserController {
 	private Server server;	// 서버
 	private Group group;	// 참여 중인 그룹
-	private User user;		// user 정보
+	// private User user; // user 정보
 	private Session session;
+	private String userName;
 
 	@OnOpen
 	public void handleOpen(Session userSession) {
@@ -32,53 +36,98 @@ public class UserController {
 
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
+		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
 
 		if (session != userSession) { // for test
 			System.out.println("이런상황이 발생할 수 있을까");
 			return;
 		}
+		this.session = userSession; // 세션 assign
 
-		System.out.println("[Server] message received success. type: " + incomingMessage.getType());
-		switch (incomingMessage.getType()) {
-		
-		/* 각 로직은 수정 및 추가 필요*/
-		case Message.REQUEST_SIGN_IN:
-			String result = MemberAdministrator.getUserAuthentication("암호화된문자열");
-			if (result == MemberAdministrator.CONFIRM) { // 서버: 승인
-				server = Server.getInstance();	// 서버 객체 할당
-				user = MemberAdministrator.getUserByEmail("사용자 이메일");
-				server.enterUserInLobby(user);			// 서버에 사용자 입장
-			} else { // 서버: 거부
+		System.out.println("[Server] message received success. type: " + type); // 메시지 타입 확인
+
+		Message responseMsg = null; // 클라이언트에게 보낼 메시지 초기화
+
+		switch (type) {
+
+		case Message.REQUEST_CREATE_GROUP: /* 요청 타입: 그룹 생성 */
+
+			server = Server.getInstance();	// "서버"의 instance 추가
+			group = server.createGroup();	// 서버에 그룹을 추가하고 "이 객체가 소속된 그룹"의 instance 추가
+			userName = group.addUser(session.getId(), this); 					// 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
+
+			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // 응답 메시지 생성, 응답 타입은 "그룹 생성 요청에 대한 응답"
+			responseMsg.add(Message.RESULT, Message.CONFIRM);					// 응답 메시지에 내용 추가: 응답 결과
+			responseMsg.add(Message.NAME, userName);							// 응답 메시지에 내용 추가: 사용자 이름
+			MessageParser.getMessageByGroup(responseMsg, group);				// 응답 메시지에 내용 추가: 그룹 정보
+
+			break;
+
+		case Message.REQUEST_JOIN_GROUP: /* 요청 타입: 그룹 참가 */
+
+			server = Server.getInstance();
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	// 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
+
+			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP);			// 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답" 
+			if (group != null) {										// 해당 그룹키에 매핑되는 그룹이 존재 시,
+				userName = group.addUser(session.getId(), this);		// 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
+				responseMsg.add(Message.RESULT, Message.CONFIRM);		// 응답 메시지에 내용 추가: 응답 결과
+				responseMsg.add(Message.NAME, userName);				// 응답 메시지에 내용 추가: 사용자 이름
+				MessageParser.getMessageByGroup(responseMsg, group);	// 응답 메시지에 내용 추가: 그룹 정보
+
+				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);	// 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보" 
+				noti.add(Message.ADDED_PARTICIPANT_NAME, userName);					// 알림 메시지에 내용 추가: 참가자 정보
+				group.send(userName, noti);
+
+			} else {													// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+				responseMsg.add(Message.RESULT, Message.REJECT);		// 응답 메시지에 내용 추가: 응답 결과
 			}
-			break;
-
-		case Message.REQUEST_SIGN_UP:
-			break;
-
-		case Message.REQUEST_CREATE_GROUP:
-			group = server.createGroup("그룹 이름");	// 해당 이름으로 그룹 생성
-			group.addUser(user.getEmail(), this);		// 그 그룹에 참여
-			break;
-
-		case Message.REQUEST_JOIN_GROUP:
-			group = server.getGroupByPrimaryKey("그룹고유키");
-			group.addUser(user.getEmail(), this);
 			break;
 
 		default:
 			// 지금은 지정되지 않은 type의 요청이 오면 그 메시지를 그대로 돌려줌.
 			System.out.println("예외사항");
-			session.getBasicRemote().sendObject(incomingMessage);
 			break;
 		}
+		System.out.println("===== 클라이언트에게 보낸 메시지 =====\n" + responseMsg + "\n============================");
+		sendMessage(session, responseMsg);					 // 전송
 	}
 
 	@OnClose
 	public void handleClose(Session userSession) {
-		group.getUsers().remove(userSession);
+		System.out.println("나감");
+		if (userSession == null) {
+			System.out.println("세션이 null");
+		}
+		// group.getUsers().remove(userSession);
 	}
 
 	@OnError
 	public void handleError(Throwable t) {
+		System.out.println("오류 발생");
+		t.printStackTrace();
+	}
+
+	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
+		session.getBasicRemote().sendObject(message);
+	}
+
+	// for test and debugging
+	private String createTmpGroup() {
+		Group group = server.createGroup();
+		if (group == null) {
+			System.out.println("그룹이 만들어지지 않음");
+		}
+		return group.getPrimaryKey();
+	}
+
+	public static void main(String[] args) {
+		Message tmpMessage = new Message().setJson("{\"group pk\":\"godoy\",\"message type\":\"request/join group\"}");
+		try {
+			new UserController().handleMessage(tmpMessage, null);
+		} catch (Exception e) {
+			System.out.println("예외 무시");
+			e.printStackTrace();
+		}
 	}
 }
