@@ -18,13 +18,14 @@ import sprout.clipcon.server.model.User;
 import sprout.clipcon.server.model.message.ChatMessageDecoder;
 import sprout.clipcon.server.model.message.ChatMessageEncoder;
 import sprout.clipcon.server.model.message.Message;
+import sprout.clipcon.server.model.message.MessageParser;
 
 @Getter
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { ChatMessageEncoder.class }, decoders = { ChatMessageDecoder.class })
 public class UserController {
 	private Server server;	// 서버
 	private Group group;	// 참여 중인 그룹
-	private User user;		// user 정보
+	// private User user; // user 정보
 	private Session session;
 	private String userName;
 
@@ -35,48 +36,51 @@ public class UserController {
 
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
-		String type = incomingMessage.getType();
+		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
 
 		if (session != userSession) { // for test
 			System.out.println("이런상황이 발생할 수 있을까");
 			return;
 		}
-		this.session = userSession;
+		this.session = userSession; // 세션 assign
 
-		System.out.println("[Server] message received success. type: " + type);
+		System.out.println("[Server] message received success. type: " + type); // 메시지 타입 확인
 
-		Message responseMsg = null;
+		Message responseMsg = null; // 클라이언트에게 보낼 메시지 초기화
+
 		switch (type) {
 
-		case Message.REQUEST_CREATE_GROUP:
-			server = Server.getInstance();			// 서버 객체 할당
-			group = server.createGroup();	// 해당 이름으로 그룹 생성
+		case Message.REQUEST_CREATE_GROUP: /* 요청 타입: 그룹 생성 */
 
-			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP);
-			userName = group.addUser(session.getId(), this);
-			responseMsg.add(Message.NAME, userName);
-			responseMsg.add(Message.RESULT, Message.CONFIRM);
-			MessageParser.getMessageByGroup(responseMsg, group);// 그룹 정보를 포함하는 Message 객체 생성
+			server = Server.getInstance();	// "서버"의 instance 추가
+			group = server.createGroup();	// 서버에 그룹을 추가하고 "이 객체가 소속된 그룹"의 instance 추가
+			userName = group.addUser(session.getId(), this); 					// 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
+
+			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // 응답 메시지 생성, 응답 타입은 "그룹 생성 요청에 대한 응답"
+			responseMsg.add(Message.RESULT, Message.CONFIRM);					// 응답 메시지에 내용 추가: 응답 결과
+			responseMsg.add(Message.NAME, userName);							// 응답 메시지에 내용 추가: 사용자 이름
+			MessageParser.getMessageByGroup(responseMsg, group);				// 응답 메시지에 내용 추가: 그룹 정보
+
 			break;
 
-		case Message.REQUEST_JOIN_GROUP:
-			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	 // 그룹키에 해당하는 객체 추출
-			// group = server.getGroupByPrimaryKey(incomingMessage.get("groupPK")); // 그룹키에 해당하는 객체 추출
-			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP);
+		case Message.REQUEST_JOIN_GROUP: /* 요청 타입: 그룹 참가 */
 
-			if (group != null) {
-				responseMsg.add(Message.RESULT, Message.CONFIRM);
-				userName = group.addUser(session.getId(), this);
-				responseMsg.add(Message.NAME, userName);
-				MessageParser.getMessageByGroup(responseMsg, group);// 그룹 정보를 포함하는 Message 객체 생성
-				
-				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);
-				noti.add(Message.ADDED_PARTICIPANT_NAME, userName);
+			server = Server.getInstance();
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	// 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
+
+			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP);			// 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답" 
+			if (group != null) {										// 해당 그룹키에 매핑되는 그룹이 존재 시,
+				userName = group.addUser(session.getId(), this);		// 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
+				responseMsg.add(Message.RESULT, Message.CONFIRM);		// 응답 메시지에 내용 추가: 응답 결과
+				responseMsg.add(Message.NAME, userName);				// 응답 메시지에 내용 추가: 사용자 이름
+				MessageParser.getMessageByGroup(responseMsg, group);	// 응답 메시지에 내용 추가: 그룹 정보
+
+				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);	// 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보" 
+				noti.add(Message.ADDED_PARTICIPANT_NAME, userName);					// 알림 메시지에 내용 추가: 참가자 정보
 				group.send(userName, noti);
-				
-			} else {
-				responseMsg.add(Message.RESULT, Message.REJECT);
+
+			} else {													// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+				responseMsg.add(Message.RESULT, Message.REJECT);		// 응답 메시지에 내용 추가: 응답 결과
 			}
 			break;
 

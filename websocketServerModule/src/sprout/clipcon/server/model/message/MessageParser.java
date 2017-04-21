@@ -1,4 +1,4 @@
-package sprout.clipcon.server.controller;
+package sprout.clipcon.server.model.message;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import sprout.clipcon.server.model.AddressBook;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.User;
-import sprout.clipcon.server.model.message.Message;
 
 public class MessageParser {
 

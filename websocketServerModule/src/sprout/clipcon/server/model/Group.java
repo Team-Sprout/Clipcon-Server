@@ -22,8 +22,9 @@ import sprout.clipcon.server.model.message.Message;
 public class Group {
 	private String primaryKey;
 	private String name;
-	public Map<String, UserController> users = Collections.synchronizedMap(new HashMap<String, UserController>());
-
+	private Map<String, UserController> users = Collections.synchronizedMap(new HashMap<String, UserController>());
+	private History history; 
+	
 	public Group(String primaryKey) {
 		this.primaryKey = primaryKey;
 	}
@@ -42,10 +43,6 @@ public class Group {
 		users.put(tmpName, session);
 		System.out.println("새 유저가 그룹에 입장");
 		return tmpName;
-	}
-
-	public User getUserByEmail(String email) {
-		return users.get(email).getUser();
 	}
 
 	public List<String> getUserList() {
@@ -73,6 +70,11 @@ public class Group {
 			}
 		}
 		return temp.toString();
+	}
+	
+	public Contents addContents(Contents contents) {
+		history.addContents(contents);
+		return contents;
 	}
 
 	public int getSize() {
