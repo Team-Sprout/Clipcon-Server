@@ -79,13 +79,13 @@ public class UserController {
 				noti.add(Message.ADDED_PARTICIPANT_NAME, userName);					// 알림 메시지에 내용 추가: 참가자 정보
 				group.send(userName, noti);
 
-			} else {													// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+			} else {																	// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT);		// 응답 메시지에 내용 추가: 응답 결과
 			}
 			break;
 
 		default:
-			// 지금은 지정되지 않은 type의 요청이 오면 그 메시지를 그대로 돌려줌.
+			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
 			break;
 		}

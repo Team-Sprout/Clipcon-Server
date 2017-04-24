@@ -1,4 +1,4 @@
- package sprout.clipcon.server.controller;
+package sprout.clipcon.server.controller;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -55,16 +55,26 @@ public class UploadServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-		requestMsgLog(request);
-
+		Enumeration<String> tmp = request.getParameterNames();
+		while (tmp.hasMoreElements()) {
+			System.out.print("찍힘");
+			System.out.println(tmp.nextElement());
+		}
+		// requestMsgLog(request);
+		System.out.println("doPost시작");
 		userName = request.getParameter("userName");
+		System.out.println("1");
 		groupPK = request.getParameter("groupPK");
+		System.out.println("2");
 		uploadTime = request.getParameter("uploadTime");
+		System.out.println("3");
 		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
+		System.out.println("4");
+
+		// XXX: delf의 임시코드 - 파일 수신부 thread로 구현
 
 		for (Part part : request.getParts()) {
-
+			System.out.println("for 시작");
 			String partName = part.getName();
 			Contents uploadContents;
 
@@ -80,43 +90,44 @@ public class UploadServlet extends HttpServlet {
 
 			// XXX[delf]: 각 case의 끝에서 파일의 경로를 설정할 수 있는 코드를 넣을 수 있는건가?
 			switch (partName) {
-			case "stringData":
-				String paramValue = getStringFromStream(part.getInputStream());
-				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
-				uploadContents.setContentsValue(paramValue);
-				System.out.println("stringData: " + paramValue);
-				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
-				break;
+				case "stringData":
+					String paramValue = getStringFromStream(part.getInputStream());
+					uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
+					uploadContents.setContentsValue(paramValue);
+					System.out.println("stringData: " + paramValue);
+					// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
+					break;
 
-			case "imageData":
-				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName()); // XXX: 이것은 무엇인가?
-				System.out.println("imageData: " + imageData.toString());
+				case "imageData":
+					uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
+					Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName()); // XXX: 이것은 무엇인가?
+					System.out.println("imageData: " + imageData.toString());
 
-				Group group = server.getGroupByPrimaryKey(groupPK);
-				group.addContents(uploadContents);
-				break;
+					Group group = server.getGroupByPrimaryKey(groupPK);
+					group.addContents(uploadContents);
+					break;
 
-			// 여러 file들을 가져옴
-			case "multipartFileData":
-				String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
-				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
-				uploadContents.setContentsValue(fileName);
-				System.out.println("fileName: " + fileName);
+				// 여러 file들을 가져옴
+				case "multipartFileData":
+					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());	// Contents객체 생성
+					String fileName = getFilenameInHeader(part.getHeader("content-disposition"));					// 파일 이름 추출
+					uploadContents.setContentsValue(fileName);																// file name 삽입
+					System.out.println("fileName: " + fileName);
 
-				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
-				getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				break;
+					/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
+					getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 
-			default:
-				System.out.println("어떤 형식에도 속하지 않음.");
+					break;
+
+				default:
+					System.out.println("어떤 형식에도 속하지 않음.");
 			}
 			System.out.println();
 		}
 		System.out.println("서블릿 끝");
-		responseMsgLog(response);
+		// responseMsgLog(response);
 	}
-	
+
 	/** String Data를 수신하는 Stream */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
@@ -177,6 +188,7 @@ public class UploadServlet extends HttpServlet {
 
 	/** File Data를 수신하는 Stream */
 	public void getFileDatStream(InputStream stream, String groupPK, String fileName) throws IOException {
+		System.out.println(" ## 파일 전송 스레드 시작 ──────────────────────────────────────────────────────────────────────────────────────────");
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 		String saveFileFullPath = saveFilePath + "\\" + fileName;
 
@@ -203,6 +215,7 @@ public class UploadServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
+		System.out.println(" ## 파일 전송 스레드 종료 ──────────────────────────────────────────────────────────────────────────────────────────");
 	}
 
 	/** Request Header "content-disposition"에서 filename 추출 */

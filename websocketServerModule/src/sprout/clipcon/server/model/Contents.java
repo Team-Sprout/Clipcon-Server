@@ -26,6 +26,7 @@ public class Contents {
 	private String contentsValue;
 	
 	public Contents(String type, String userEmail, String time, long size) {
+		this();
 		this.contentsType = type;
 		this.uploadUserName = userEmail;
 		this.uploadTime = time;
