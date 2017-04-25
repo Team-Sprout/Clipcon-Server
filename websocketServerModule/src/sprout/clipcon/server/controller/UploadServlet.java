@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.swing.ImageIcon;
 
-import org.apache.tomcat.util.buf.UEncoder;
-
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 
@@ -55,11 +53,6 @@ public class UploadServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Enumeration<String> tmp = request.getParameterNames();
-		while (tmp.hasMoreElements()) {
-			System.out.print("¬Ô»˚");
-			System.out.println(tmp.nextElement());
-		}
 		// requestMsgLog(request);
 		System.out.println("doPostΩ√¿€");
 		userName = request.getParameter("userName");
