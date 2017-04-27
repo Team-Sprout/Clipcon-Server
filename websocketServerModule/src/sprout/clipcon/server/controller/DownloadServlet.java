@@ -26,7 +26,7 @@ public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	// 파일을 저장되어있는 root location
-	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
+	private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\";
 
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
@@ -44,19 +44,16 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		requestMsgLog(request);
 
 		// get Request Data
 		userEmail = request.getParameter("userEmail");
 		groupPK = request.getParameter("groupPK");
 		downloadDataPK = request.getParameter("downloadDataPK");
-		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", downloadDataPK: "
-				+ downloadDataPK);
+		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK);
 		System.out.println();
 
 		// 서버에서 groupPK로 해당 history에서 downloadDataPK인 Contents를 찾는다.
@@ -101,40 +98,40 @@ public class DownloadServlet extends HttpServlet {
 
 		// 해당 downloadDataPK의 Contents타입에 따라 다르게 처리(Set response Headers)
 		switch (contentsType) {
-		case "STRING":
-			String stringData = testcontent.getContentsValue();
+			case "STRING":
+				String stringData = testcontent.getContentsValue();
 
-			response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
-			response.setContentType("text/plain; charset=UTF-8");
+				response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
+				response.setContentType("text/plain; charset=UTF-8");
 
-			sendStringData(stringData, response.getOutputStream());
+				sendStringData(stringData, response.getOutputStream());
 
-			break;
-		case "IMAGE":
-			String imageFileName = testcontent.getContentsPKName();
+				break;
+			case "IMAGE":
+				String imageFileName = testcontent.getContentsPKName();
 
-			response.setContentType("image/jpeg");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
-			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+				response.setContentType("image/jpeg");
+				response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
+				response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 
-			// dir에 있는 image file을 가져와 전송. (ByteArrayStream)
-			sendFileData(imageFileName, response.getOutputStream());
+				// dir에 있는 image file을 가져와 전송. (ByteArrayStream)
+				sendFileData(imageFileName, response.getOutputStream());
 
-			break;
-		case "FILE":
-			String fileName = testcontent.getContentsPKName();
+				break;
+			case "FILE":
+				String fileName = testcontent.getContentsPKName();
 
-			// response.setContentType("multipart/mixed");
-			response.setContentType("application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
-			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+				// response.setContentType("multipart/mixed");
+				response.setContentType("application/octet-stream");
+				response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
+				response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 
-			// dir에 있는 file을 가져와 전송. (FileStream)
-			sendFileData(fileName, response.getOutputStream());
+				// dir에 있는 file을 가져와 전송. (FileStream)
+				sendFileData(fileName, response.getOutputStream());
 
-			break;
-		default:
-			System.out.println("어떤 형식에도 속하지 않음.");
+				break;
+			default:
+				System.out.println("어떤 형식에도 속하지 않음.");
 		}
 
 		// responseMsgLog(response);
@@ -145,8 +142,7 @@ public class DownloadServlet extends HttpServlet {
 	 *      response)
 	 */
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// doGet(request, response);
 	}
 

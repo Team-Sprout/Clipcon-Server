@@ -14,7 +14,7 @@ public class History {
 	private Map<String, Contents> contentsMap;
 
 	public History(String groupPK) {
-		this.groupPK = groupPK;
+		this.groupPK = groupPK; // XXX[delf]: 사실 필요한지 잘 모르겠음
 	}
 
 	/** 새로운 데이터가 업로드되면 히스토리에 add */
