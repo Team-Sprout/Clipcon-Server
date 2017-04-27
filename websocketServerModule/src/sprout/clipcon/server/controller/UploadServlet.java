@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.imageio.ImageIO;
@@ -23,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.swing.ImageIcon;
+
+import com.oreilly.servlet.MultipartRequest;
 
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
@@ -36,15 +39,20 @@ public class UploadServlet extends HttpServlet {
 
 	private Server server = Server.getInstance();
 
+	public UploadServlet() {
+		System.out.println("UploadServlet 생성");
+	}
+
 	// 업로드 파일을 저장할 위치
-	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
-	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // XXX: 지우지 마세여
+	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
+	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
 	// 업로드한 파일을 저장할 폴더
 	private File receiveFolder;
 
 	private String userName = null;
 	private String groupPK = null;
 	private String uploadTime = null;
+	private boolean flag = false;
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -54,20 +62,21 @@ public class UploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// requestMsgLog(request);
-		System.out.println("doPost시작");
+		System.out.println("================================================================\ndoPost시작");
+
+		Date sd = new Date();
+		long len = request.getContentLengthLong();
+		System.out.print("req len = " + len + " kb (");
+		System.out.println((float) len / (1024 * 1024) + " mb)");
+
 		userName = request.getParameter("userName");
-		System.out.println("1");
 		groupPK = request.getParameter("groupPK");
-		System.out.println("2");
 		uploadTime = request.getParameter("uploadTime");
-		System.out.println("3");
 		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
-		System.out.println("4");
 
-		// XXX: delf의 임시코드 - 파일 수신부 thread로 구현
-
+		Group group = server.getGroupByPrimaryKey(groupPK);
+		
 		for (Part part : request.getParts()) {
-			System.out.println("for 시작");
 			String partName = part.getName();
 			Contents uploadContents;
 
@@ -81,7 +90,6 @@ public class UploadServlet extends HttpServlet {
 
 			System.out.println("...........>> " + partName);
 
-			// XXX[delf]: 각 case의 끝에서 파일의 경로를 설정할 수 있는 코드를 넣을 수 있는건가?
 			switch (partName) {
 				case "stringData":
 					String paramValue = getStringFromStream(part.getInputStream());
@@ -89,27 +97,30 @@ public class UploadServlet extends HttpServlet {
 					uploadContents.setContentsValue(paramValue);
 					System.out.println("stringData: " + paramValue);
 					// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
+					
+					group.addContents(uploadContents);
 					break;
 
 				case "imageData":
 					uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
-					Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName()); // XXX: 이것은 무엇인가?
+					Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 					System.out.println("imageData: " + imageData.toString());
-
-					Group group = server.getGroupByPrimaryKey(groupPK);
 					group.addContents(uploadContents);
 					break;
 
 				// 여러 file들을 가져옴
 				case "multipartFileData":
-					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());	// Contents객체 생성
-					String fileName = getFilenameInHeader(part.getHeader("content-disposition"));					// 파일 이름 추출
-					uploadContents.setContentsValue(fileName);																// file name 삽입
-					System.out.println("fileName: " + fileName);
+					String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
+					String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+
+					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
+					uploadContents.setContentsValue(fileName);
+					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
 
 					/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
 					getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-
+					
+					group.addContents(uploadContents);
 					break;
 
 				default:
@@ -117,7 +128,13 @@ public class UploadServlet extends HttpServlet {
 			}
 			System.out.println();
 		}
+		
 		System.out.println("서블릿 끝");
+		Date ed = new Date();
+		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
+		System.out.println("소요시간 = " + t + "초");
+		System.out.print("속도 = " + (float) len / t + " kb/s (");
+		System.out.println((float) len / t / (1024 * 1024) + " mb/s)");
 		// responseMsgLog(response);
 	}
 
@@ -181,7 +198,8 @@ public class UploadServlet extends HttpServlet {
 
 	/** File Data를 수신하는 Stream */
 	public void getFileDatStream(InputStream stream, String groupPK, String fileName) throws IOException {
-		System.out.println(" ## 파일 전송 스레드 시작 ──────────────────────────────────────────────────────────────────────────────────────────");
+
+		Date start = new Date();
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 		String saveFileFullPath = saveFilePath + "\\" + fileName;
 
@@ -193,13 +211,18 @@ public class UploadServlet extends HttpServlet {
 		int bytesRead = -1;
 		byte[] buffer = new byte[0xFFFF]; // 65536
 
+		int testCnt = 0;
 		try {
 			// input stream from the HTTP connection
 			while ((bytesRead = stream.read(buffer)) != -1) {
+				testCnt++;
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
 			fileOutputStream.flush();
-
+			System.out.println("루프 횟수 = " + testCnt);
+			flag = true;
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			try {
 				fileOutputStream.close();
@@ -208,7 +231,8 @@ public class UploadServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-		System.out.println(" ## 파일 전송 스레드 종료 ──────────────────────────────────────────────────────────────────────────────────────────");
+		Date end = new Date();
+		System.out.println("소요시간: " + (end.getTime() - start.getTime()));
 	}
 
 	/** Request Header "content-disposition"에서 filename 추출 */
@@ -225,7 +249,7 @@ public class UploadServlet extends HttpServlet {
 	/** 업로드한 파일을 저장할 그룹 폴더 생성 */
 	private void createFileReceiveFolder(String saveFilePath) {
 		receiveFolder = new File(saveFilePath);
-
+		System.out.println("폴더 생성");
 		// C:\\Program Files에 LinKlipboard폴더가 존재하지 않으면
 		if (!receiveFolder.exists()) {
 			receiveFolder.mkdir(); // 폴더 생성
@@ -245,7 +269,7 @@ public class UploadServlet extends HttpServlet {
 		uploadContents.setContentsValue(contentsValue);
 		System.out.println("<UniqueSetting> contentsType: " + uploadContents.getContentsType() + ", contentsValue: " + uploadContents.getContentsValue());
 
-		// saveContentsToHistory(uploadContents);
+		//saveContentsToHistory(uploadContents);
 	}
 
 	/** Image를 Resizing한 ImageIcon으로 return */
@@ -328,5 +352,12 @@ public class UploadServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+}
+
+class TestThread extends Thread {
+	@Override
+	public void run() {
+
 	}
 }
