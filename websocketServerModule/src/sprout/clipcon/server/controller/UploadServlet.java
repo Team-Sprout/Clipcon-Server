@@ -42,6 +42,9 @@ public class UploadServlet extends HttpServlet {
 	public UploadServlet() {
 		System.out.println("UploadServlet 생성");
 	}
+	
+	//additional git commit test in server code
+	public String test = "for test";
 
 	// 업로드 파일을 저장할 위치
 	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
