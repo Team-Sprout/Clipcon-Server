@@ -44,8 +44,8 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	// 업로드 파일을 저장할 위치
-	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
-	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
+	 private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
+//	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
 	// 업로드한 파일을 저장할 폴더
 	private File receiveFolder;
 
