@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 /**
  * 클라이언트에서 받은 string을 object(Message)로 decoding. */
-public class ChatMessageDecoder implements Decoder.Text<Message> {
+public class MessageDecoder implements Decoder.Text<Message> {
 	JSONObject json;
 
 	public void destroy() {

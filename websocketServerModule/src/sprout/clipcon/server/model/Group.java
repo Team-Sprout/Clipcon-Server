@@ -74,15 +74,19 @@ public class Group {
 			int rIndex = rnd.nextInt(1);
 			switch (rIndex) {
 				case 0:
-					// a-z
-					temp.append((char) ((int) (rnd.nextInt(26)) + 97));
+				// a-z
+				temp.append((char) ((int) (rnd.nextInt(26)) + 97));
 					break;
 				case 1:
-					// 0-9
-					temp.append((rnd.nextInt(10)));
+				// 0-9
+				temp.append((rnd.nextInt(10)));
 					break;
 			}
 		}
 		return temp.toString();
+	}
+
+	public void removeUser(String userName) {
+		users.remove(userName);
 	}
 }

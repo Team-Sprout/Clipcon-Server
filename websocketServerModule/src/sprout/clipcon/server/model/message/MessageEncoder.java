@@ -8,7 +8,7 @@ import javax.websocket.EndpointConfig;
 
 import org.json.JSONObject;
 
-public class ChatMessageEncoder implements Encoder.Text<Message> {
+public class MessageEncoder implements Encoder.Text<Message> {
 	private JSONObject tmp;
 
 	public void destroy() {

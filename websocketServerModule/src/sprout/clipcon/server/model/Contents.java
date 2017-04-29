@@ -1,5 +1,8 @@
 package sprout.clipcon.server.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,9 +11,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Contents {
-	public static String TYPE_STRING = "STRING";
-	public static String TYPE_IMAGE = "IMAGE";
-	public static String TYPE_FILE = "FILE";
+	public final static String TYPE_STRING = "STRING";
+	public final static String TYPE_IMAGE = "IMAGE";
+	public final static String TYPE_FILE = "FILE";
 
 	private String contentsType;
 	private long contentsSize;
@@ -24,18 +27,28 @@ public class Contents {
 
 	// String Type: String값, File Type: FileOriginName
 	private String contentsValue;
-	
+
+	private List<String> filePaths;
+
 	public Contents(String type, String userEmail, String time, long size) {
 		this();
 		this.contentsType = type;
 		this.uploadUserName = userEmail;
 		this.uploadTime = time;
 		this.contentsSize = size;
+		
+		if(contentsType.equals(TYPE_FILE)) {
+			filePaths = new ArrayList<String>();
+		}
 	}
 
 	/** 생성 시 고유키값을 할당한다. */
 	public Contents() {
 		this.contentsPKName = Integer.toString(++contentsPKValue);
 		System.out.println("Contents 생성자 호출, ++contentsPKValue");
+	}
+
+	public void addPath(String path) {
+		filePaths.add(path);
 	}
 }

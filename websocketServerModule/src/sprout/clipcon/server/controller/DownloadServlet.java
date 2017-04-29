@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import sprout.clipcon.server.model.Contents;
+import sprout.clipcon.server.model.Group;
 
 /**
  * Servlet implementation class DownloadServlet
@@ -32,10 +33,11 @@ public class DownloadServlet extends HttpServlet {
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
 
-	private String userEmail = null;
+	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
 
+	private Server server = Server.getInstance();
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -50,56 +52,22 @@ public class DownloadServlet extends HttpServlet {
 		requestMsgLog(request);
 
 		// get Request Data
-		userEmail = request.getParameter("userEmail");
+		userName = request.getParameter("userEmail");
 		groupPK = request.getParameter("groupPK");
 		downloadDataPK = request.getParameter("downloadDataPK");
-		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK);
+		System.out.println("<Parameter> userEmail: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK);
 		System.out.println();
-
-		// 서버에서 groupPK로 해당 history에서 downloadDataPK인 Contents를 찾는다.
-		/* test를 위한 setting */
-		Contents testcontent = new Contents();
-
-		/* File의 경우 */
-		// testcontent.setContentsPKName("2");
-		// testcontent.setContentsSize(80451275);
-		// testcontent.setContentsType(Contents.TYPE_FILE);
-		// testcontent.setContentsValue("taeyeon.mp3");
-		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		// testcontent.setContentsPKName("3");
-		// testcontent.setContentsSize(387);
-		// testcontent.setContentsType(Contents.TYPE_FILE);
-		// testcontent.setContentsValue("bbbb.jpeg");
-		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		/* String의 경우 */
-		testcontent.setContentsPKName("1");
-		testcontent.setContentsSize(45);
-		testcontent.setContentsType(Contents.TYPE_STRING);
-		testcontent.setContentsValue("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		testcontent.setUploadTime("2017-4-19 날짜 10:53:06");
-		testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		/* Image의 경우 */
-		// testcontent.setContentsPKName("1");
-		// testcontent.setContentsSize(4733);
-		// testcontent.setContentsType(Contents.TYPE_IMAGE);
-		// testcontent.setContentsValue("");
-		// testcontent.setUploadTime("2017-4-19 날짜 11:06:04");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		String contentsType = testcontent.getContentsType();
-
-		// 해당 downloadDataPK의 Contents타입을 client에 알림
-		// response.setHeader("contentsType", "");
-
-		// 해당 downloadDataPK의 Contents타입에 따라 다르게 처리(Set response Headers)
+		
+		// XXX[ALL]: 여기 있던 코드는 github나 맨 아래 주석을 참조할 것 지저분해서 버렸음
+		
+		Group group = server.getGroupByPrimaryKey(groupPK);
+		Contents contents = group.getContents(downloadDataPK);
+		String contentsType = contents.getContentsType();
+		
+		// XXX[희정]: 이 부분 테스트 바람
 		switch (contentsType) {
 			case "STRING":
-				String stringData = testcontent.getContentsValue();
+				String stringData = contents.getContentsValue();
 
 				response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
 				response.setContentType("text/plain; charset=UTF-8");
@@ -108,7 +76,7 @@ public class DownloadServlet extends HttpServlet {
 
 				break;
 			case "IMAGE":
-				String imageFileName = testcontent.getContentsPKName();
+				String imageFileName = contents.getContentsPKName();
 
 				response.setContentType("image/jpeg");
 				response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
@@ -119,7 +87,7 @@ public class DownloadServlet extends HttpServlet {
 
 				break;
 			case "FILE":
-				String fileName = testcontent.getContentsPKName();
+				String fileName = contents.getContentsPKName();
 
 				// response.setContentType("multipart/mixed");
 				response.setContentType("application/octet-stream");
@@ -295,3 +263,52 @@ public class DownloadServlet extends HttpServlet {
 		}
 	}
 }
+
+
+
+//// 서버에서 groupPK로 해당 history에서 downloadDataPK인 Contents를 찾는다.
+//		/* test를 위한 setting */
+//		Contents testcontent = new Contents();
+//
+//		/* File의 경우 */
+//		// testcontent.setContentsPKName("2");
+//		// testcontent.setContentsSize(80451275);
+//		// testcontent.setContentsType(Contents.TYPE_FILE);
+//		// testcontent.setContentsValue("taeyeon.mp3");
+//		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		// testcontent.setContentsPKName("3");
+//		// testcontent.setContentsSize(387);
+//		// testcontent.setContentsType(Contents.TYPE_FILE);
+//		// testcontent.setContentsValue("bbbb.jpeg");
+//		// testcontent.setUploadTime("2017-4-19 날짜 10:19:34");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		/* String의 경우 */
+//		testcontent.setContentsPKName("1");
+//		testcontent.setContentsSize(45);
+//		testcontent.setContentsType(Contents.TYPE_STRING);
+//		testcontent.setContentsValue("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//		testcontent.setUploadTime("2017-4-19 날짜 10:53:06");
+//		testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		/* Image의 경우 */
+//		// testcontent.setContentsPKName("1");
+//		// testcontent.setContentsSize(4733);
+//		// testcontent.setContentsType(Contents.TYPE_IMAGE);
+//		// testcontent.setContentsValue("");
+//		// testcontent.setUploadTime("2017-4-19 날짜 11:06:04");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		String contentsType = testcontent.getContentsType();
+//
+//		// 해당 downloadDataPK의 Contents타입을 client에 알림
+//		// response.setHeader("contentsType", "");
+//
+//		// 해당 downloadDataPK의 Contents타입에 따라 다르게 처리(Set response Headers)
+
+
+
+
+ 
