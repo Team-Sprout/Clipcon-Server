@@ -110,7 +110,7 @@ public class UploadServlet extends HttpServlet {
 
 				// 여러 file들을 가져옴
 				case "multipartFileData":
-				String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
+				String fileName = getFilenameInHeader(part.getHeader("Content-Disposition"));
 				String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 
 				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
@@ -118,7 +118,7 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
 
 				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
-				getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 
 				group.addContents(uploadContents);
 					break;
@@ -206,7 +206,7 @@ public class UploadServlet extends HttpServlet {
 
 	/** File Data를 수신하는 Stream */
 	// 가 아니라 파일화 하는 역할
-	public void getFileDatStream(InputStream stream, String groupPK, String fileName) throws IOException {
+	public void getFileDataStream(InputStream stream, String groupPK, String fileName) throws IOException {
 
 		Date start = new Date();
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
