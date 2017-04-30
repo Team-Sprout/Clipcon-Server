@@ -40,7 +40,7 @@ public class Group {
 	}
 
 	public String addUser(String name, UserController session) {
-		String tmpName = getTmepUsername();
+		String tmpName = getTempUsername();
 		users.put(tmpName, session);
 		System.out.println("새 유저가 그룹에 입장");
 		return tmpName;
@@ -67,7 +67,7 @@ public class Group {
 		return users.size();
 	}
 
-	public String getTmepUsername() {
+	public String getTempUsername() {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
 		for (int i = 0; i < 6; i++) {
