@@ -1,6 +1,5 @@
 package sprout.clipcon.server.model.message;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -57,12 +56,13 @@ public class MessageParser {
 		return new Message();
 	}
 
-	public Message addContentsToMessage(Message message, Contents contents) {
+	public static Message addContentsToMessage(Message message, Contents contents) {
 		message.add("contentsType", contents.getContentsType()); // type
 		message.add("contentsSize", contents.getContentsSize()); // size
 		message.add("contentsPKName", contents.getContentsPKName()); // pk
 		message.add("uploadUserName", contents.getUploadUserName()); // name
 		message.add("uploadTime", contents.getUploadTime()); // time
+		message.add("contentsValue", contents.getContentsValue());
 		
 		return message;
 	}

@@ -10,10 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.Collection;
+import java.util.Base64;
 import java.util.Date;
-import java.util.Enumeration;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -29,6 +27,7 @@ import javax.websocket.EncodeException;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
+import sprout.clipcon.server.model.message.MessageParser;
 
 /* maxFileSize: 최대 파일 크기(100MB)
  * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
@@ -44,8 +43,8 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	// 업로드 파일을 저장할 위치
-	 private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
-//	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
+	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
+	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
 	// 업로드한 파일을 저장할 폴더
 	private File receiveFolder;
 
@@ -76,9 +75,9 @@ public class UploadServlet extends HttpServlet {
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
+		Contents uploadContents = null;
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
-			Contents uploadContents = null;
 
 			/*
 			 * To find out file name, parse header value of content-disposition e.g. form-data; name="file"; filename=""
@@ -91,7 +90,7 @@ public class UploadServlet extends HttpServlet {
 			System.out.println("...........>> " + partName);
 
 			switch (partName) {
-				case "stringData":
+			case "stringData":
 				String paramValue = getStringFromStream(part.getInputStream());
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
@@ -99,43 +98,46 @@ public class UploadServlet extends HttpServlet {
 				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
 
 				group.addContents(uploadContents);
-					break;
+			break;
 
-				case "imageData":
+			case "imageData":
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				System.out.println("imageData: " + imageData.toString());
 				group.addContents(uploadContents);
-					break;
+			break;
 
 				// 여러 file들을 가져옴
 				case "multipartFileData":
 				String fileName = getFilenameInHeader(part.getHeader("Content-Disposition"));
+
 				String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 
 				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(fileName);
 				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
 
+				System.out.println("header test: " + part.getHeader("test"));
+
 				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-
 				group.addContents(uploadContents);
-					break;
+			break;
 
-				default:
+			default:
 				System.out.println("어떤 형식에도 속하지 않음.");
 			}
 
-			Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);	// 알림 메시지 생성, 알림 타입은 "데이터 업로드"
-			uploadNoti.add(Message.UPLOAD_CONTENTS, uploadContents);						// 알림 메시지에 내용 추가: contents
-			try {
-				group.send(userName, uploadNoti);
-			} catch (EncodeException e) {
-				e.printStackTrace();
-			}
-			System.out.println();
 		}
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);	// 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
+
+		try {
+			group.send(userName, uploadNoti);
+		} catch (EncodeException e) {
+			e.printStackTrace();
+		}
+		System.out.println();
 
 		System.out.println("서블릿 끝");
 		Date ed = new Date();
@@ -274,13 +276,15 @@ public class UploadServlet extends HttpServlet {
 
 		return resizingImageIcon;
 	}
-	
-	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌 
-}
+//	O
+//	private String getStringFromBitmap(Image bitmapPicture) {
+//		String encodedImage;
+//		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+//		bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+//		byte[] b = byteArrayBitmapStream.toByteArray();
+//		encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+//		return encodedImage;
+//	}
 
-class TestThread extends Thread {
-	@Override
-	public void run() {
-
-	}
+	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌
 }

@@ -11,11 +11,10 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import lombok.Getter;
-import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
+import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageDecoder;
 import sprout.clipcon.server.model.message.MessageEncoder;
-import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
 
 @Getter
