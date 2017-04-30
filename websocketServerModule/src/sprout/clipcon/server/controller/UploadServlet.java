@@ -24,11 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.swing.ImageIcon;
-
-import com.oreilly.servlet.MultipartRequest;
+import javax.websocket.EncodeException;
 
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
+import sprout.clipcon.server.model.message.Message;
 
 /* maxFileSize: 최대 파일 크기(100MB)
  * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
@@ -75,10 +75,10 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
-		
+
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
-			Contents uploadContents;
+			Contents uploadContents = null;
 
 			/*
 			 * To find out file name, parse header value of content-disposition e.g. form-data; name="file"; filename=""
@@ -92,43 +92,51 @@ public class UploadServlet extends HttpServlet {
 
 			switch (partName) {
 				case "stringData":
-					String paramValue = getStringFromStream(part.getInputStream());
-					uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
-					uploadContents.setContentsValue(paramValue);
-					System.out.println("stringData: " + paramValue);
-					// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
-					
-					group.addContents(uploadContents);
+				String paramValue = getStringFromStream(part.getInputStream());
+				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
+				uploadContents.setContentsValue(paramValue);
+				System.out.println("stringData: " + paramValue);
+				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
+
+				group.addContents(uploadContents);
 					break;
 
 				case "imageData":
-					uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
-					Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-					System.out.println("imageData: " + imageData.toString());
-					group.addContents(uploadContents);
+				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				System.out.println("imageData: " + imageData.toString());
+				group.addContents(uploadContents);
 					break;
 
 				// 여러 file들을 가져옴
 				case "multipartFileData":
-					String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
-					String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+				String fileName = getFilenameInHeader(part.getHeader("content-disposition"));
+				String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 
-					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
-					uploadContents.setContentsValue(fileName);
-					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
+				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
+				uploadContents.setContentsValue(fileName);
+				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
 
-					/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
-					getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-					
-					group.addContents(uploadContents);
+				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
+				getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+
+				group.addContents(uploadContents);
 					break;
 
 				default:
-					System.out.println("어떤 형식에도 속하지 않음.");
+				System.out.println("어떤 형식에도 속하지 않음.");
+			}
+
+			Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);	// 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+			uploadNoti.add(Message.UPLOAD_CONTENTS, uploadContents);						// 알림 메시지에 내용 추가: contents
+			try {
+				group.send(userName, uploadNoti);
+			} catch (EncodeException e) {
+				e.printStackTrace();
 			}
 			System.out.println();
 		}
-		
+
 		System.out.println("서블릿 끝");
 		Date ed = new Date();
 		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
@@ -197,6 +205,7 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	/** File Data를 수신하는 Stream */
+	// 가 아니라 파일화 하는 역할
 	public void getFileDatStream(InputStream stream, String groupPK, String fileName) throws IOException {
 
 		Date start = new Date();
@@ -257,21 +266,6 @@ public class UploadServlet extends HttpServlet {
 		}
 	}
 
-	/** Contents에 대한 정보 Setting */
-	private void setContentsInfo(Contents uploadContents, long contentsSize, String contentsType, String contentsValue) {
-		System.out.println("<contentsPKName>: " + uploadContents.contentsPKName);
-		uploadContents.setContentsSize(contentsSize);
-		uploadContents.setUploadUserName(userName);
-		uploadContents.setUploadTime(uploadTime);
-		System.out.println("<CommonSetting> ContentsSize: " + uploadContents.getContentsSize() + ", UploadUserName: " + uploadContents.getUploadUserName() + ", UploadTime: " + uploadContents.getUploadTime());
-
-		uploadContents.setContentsType(contentsType);
-		uploadContents.setContentsValue(contentsValue);
-		System.out.println("<UniqueSetting> contentsType: " + uploadContents.getContentsType() + ", contentsValue: " + uploadContents.getContentsValue());
-
-		//saveContentsToHistory(uploadContents);
-	}
-
 	/** Image를 Resizing한 ImageIcon으로 return */
 	public ImageIcon getResizingImageIcon(Image imageData) {
 		// FIXME: 이미지의 크기를 줄일 때, 비율을 맞출 것
@@ -280,79 +274,8 @@ public class UploadServlet extends HttpServlet {
 
 		return resizingImageIcon;
 	}
-
-	/** request Msg 출력 */
-	public void requestMsgLog(HttpServletRequest request) {
-
-		/* server가 받은 request 시작줄 정보 */
-		System.out.println("==================STARTLINE==================");
-		System.out.println("Request Method: " + request.getMethod());
-		System.out.println("Request RequestURI: " + request.getRequestURI());
-		System.out.println("Request Protocol: " + request.getProtocol());
-
-		/* server가 받은 request 헤더 정보 */
-		/* server가 받은 기본적인 request header msg 정보 */
-		System.out.println("===================HEADER====================");
-		Enumeration headerNames = request.getHeaderNames();
-
-		while (headerNames.hasMoreElements()) {
-			String headerName = (String) headerNames.nextElement();
-
-			System.out.println(headerName + ": " + request.getHeader(headerName));
-		}
-		System.out.println("-------------------------------------------");
-		System.out.println("Request LocalAddr: " + request.getLocalAddr());
-		System.out.println("Request LocalName: " + request.getLocalName());
-		System.out.println("Request LocalPort: " + request.getLocalPort());
-		System.out.println("-------------------------------------------");
-		System.out.println("Request RemoteAddr: " + request.getRemoteAddr());
-		System.out.println("Request RemoteHost: " + request.getRemoteHost());
-		System.out.println("Request RemotePort: " + request.getRemotePort());
-		System.out.println("Request RemoteUser: " + request.getRemoteUser());
-
-		System.out.println("==================ENTITY====================");
-		System.out.println("userName: " + request.getParameter("userName"));
-		System.out.println("groupPK: " + request.getParameter("groupPK"));
-		System.out.println("downloadDataPK: " + request.getParameter("downloadDataPK"));
-		System.out.println("===========================================");
-		System.out.println();
-		System.out.println();
-	}
-
-	/** Client로 response Msg 전달 */
-	public void responseMsgLog(HttpServletResponse response) {
-		PrintWriter writer;
-		try {
-			writer = response.getWriter();
-
-			response.setContentType("text/html");
-			// response.setCharacterEncoding("UTF-8");
-
-			writer.println("Http Post Response: " + response.toString());
-
-			/* client가 받은 response 시작줄 정보 */
-			writer.println("==================STARTLINE==================");
-			writer.println("Response Status: " + response.getStatus());
-			writer.println("Response ContentType: " + response.getContentType());
-
-			/* client가 받은 response 헤더 정보 */
-			writer.println("==================HEADER=====================");
-			Collection<String> headerNames = response.getHeaderNames();
-
-			while (!headerNames.isEmpty()) {
-				String headerName = (String) headerNames.toString();
-
-				writer.println(headerName + ": " + response.getHeader(headerName));
-			}
-
-			writer.println("===================ENTITY====================");
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	
+	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌 
 }
 
 class TestThread extends Thread {

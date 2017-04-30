@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import sprout.clipcon.server.model.Contents;
+import sprout.clipcon.server.model.Group;
 
 /**
  * Servlet implementation class DownloadServlet
@@ -25,19 +26,20 @@ import sprout.clipcon.server.model.Contents;
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	// ÆÄÀÏÀ» ÀúÀåµÇ¾îÀÖ´Â root location
-	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // Å×½ºÆ® °æ·Î2
-	// private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // Å×½ºÆ® °æ·Î1
+	// íŒŒì¼ì„ ì €ì¥ë˜ì–´ìˆëŠ” root location
+	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // í…ŒìŠ¤íŠ¸ ê²½ë¡œ2
+	// private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // í…ŒìŠ¤íŠ¸ ê²½ë¡œ1
 	
 
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
 
-	private String userEmail = null;
+	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
 
+	private Server server = Server.getInstance();
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -54,89 +56,58 @@ public class DownloadServlet extends HttpServlet {
 		requestMsgLog(request);
 
 		// get Request Data
-		userEmail = request.getParameter("userEmail");
+		userName = request.getParameter("userEmail");
 		groupPK = request.getParameter("groupPK");
 		downloadDataPK = request.getParameter("downloadDataPK");
-		System.out.println("<Parameter> userEmail: " + userEmail + ", groupPK: " + groupPK + ", downloadDataPK: "
-				+ downloadDataPK);
+    
+		System.out.println("<Parameter> userEmail: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK);
+
 		System.out.println();
-
-		// ¼­¹ö¿¡¼­ groupPK·Î ÇØ´ç history¿¡¼­ downloadDataPKÀÎ Contents¸¦ Ã£´Â´Ù.
-		/* test¸¦ À§ÇÑ setting */
-		Contents testcontent = new Contents();
-
-		/* FileÀÇ °æ¿ì */
-		// testcontent.setContentsPKName("2");
-		// testcontent.setContentsSize(80451275);
-		// testcontent.setContentsType(Contents.TYPE_FILE);
-		// testcontent.setContentsValue("taeyeon.mp3");
-		// testcontent.setUploadTime("2017-4-19 ³¯Â¥ 10:19:34");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		// testcontent.setContentsPKName("3");
-		// testcontent.setContentsSize(387);
-		// testcontent.setContentsType(Contents.TYPE_FILE);
-		// testcontent.setContentsValue("bbbb.jpeg");
-		// testcontent.setUploadTime("2017-4-19 ³¯Â¥ 10:19:34");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		/* StringÀÇ °æ¿ì */
-		testcontent.setContentsPKName("1");
-		testcontent.setContentsSize(45);
-		testcontent.setContentsType(Contents.TYPE_STRING);
-		testcontent.setContentsValue("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		testcontent.setUploadTime("2017-4-19 ³¯Â¥ 10:53:06");
-		testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		/* ImageÀÇ °æ¿ì */
-		// testcontent.setContentsPKName("1");
-		// testcontent.setContentsSize(4733);
-		// testcontent.setContentsType(Contents.TYPE_IMAGE);
-		// testcontent.setContentsValue("");
-		// testcontent.setUploadTime("2017-4-19 ³¯Â¥ 11:06:04");
-		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
-
-		String contentsType = testcontent.getContentsType();
-
-		// ÇØ´ç downloadDataPKÀÇ ContentsÅ¸ÀÔÀ» client¿¡ ¾Ë¸²
-		// response.setHeader("contentsType", "");
-
-		// ÇØ´ç downloadDataPKÀÇ ContentsÅ¸ÀÔ¿¡ µû¶ó ´Ù¸£°Ô Ã³¸®(Set response Headers)
+		
+		// XXX[ALL]: ì—¬ê¸° ìˆë˜ ì½”ë“œëŠ” githubë‚˜ ë§¨ ì•„ë˜ ì£¼ì„ì„ ì°¸ì¡°í•  ê²ƒ ì§€ì €ë¶„í•´ì„œ ë²„ë ¸ìŒ
+		
+		Group group = server.getGroupByPrimaryKey(groupPK);
+		Contents contents = group.getContents(downloadDataPK);
+		String contentsType = contents.getContentsType();
+		
+		// XXX[í¬ì •]: ì´ ë¶€ë¶„ í…ŒìŠ¤íŠ¸ ë°”ëŒ
 		switch (contentsType) {
-		case "STRING":
-			String stringData = testcontent.getContentsValue();
+			case "STRING":
+				String stringData = contents.getContentsValue();
+
 
 			response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
 			response.setContentType("text/plain; charset=UTF-8");
 
 			sendStringData(stringData, response.getOutputStream());
 
-			break;
-		case "IMAGE":
-			String imageFileName = testcontent.getContentsPKName();
+				break;
+			case "IMAGE":
+				String imageFileName = contents.getContentsPKName();
+
 
 			response.setContentType("image/jpeg");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 
-			// dir¿¡ ÀÖ´Â image fileÀ» °¡Á®¿Í Àü¼Û. (ByteArrayStream)
+			// dirì— ìˆëŠ” image fileì„ ê°€ì ¸ì™€ ì „ì†¡. (ByteArrayStream)
 			sendFileData(imageFileName, response.getOutputStream());
 
-			break;
-		case "FILE":
-			String fileName = testcontent.getContentsPKName();
+				break;
+			case "FILE":
+				String fileName = contents.getContentsPKName();
 
 			// response.setContentType("multipart/mixed");
 			response.setContentType("application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 
-			// dir¿¡ ÀÖ´Â fileÀ» °¡Á®¿Í Àü¼Û. (FileStream)
+			// dirì— ìˆëŠ” fileì„ ê°€ì ¸ì™€ ì „ì†¡. (FileStream)
 			sendFileData(fileName, response.getOutputStream());
 
 			break;
 		default:
-			System.out.println("¾î¶² Çü½Ä¿¡µµ ¼ÓÇÏÁö ¾ÊÀ½.");
+			System.out.println("ì–´ë–¤ í˜•ì‹ì—ë„ ì†í•˜ì§€ ì•ŠìŒ.");
 		}
 
 		// responseMsgLog(response);
@@ -152,7 +123,7 @@ public class DownloadServlet extends HttpServlet {
 		// doGet(request, response);
 	}
 
-	/** String Data Àü¼Û */
+	/** String Data ì „ì†¡ */
 	public void sendStringData(String stringData, OutputStream outputStream) {
 		try {
 
@@ -168,9 +139,9 @@ public class DownloadServlet extends HttpServlet {
 		}
 	}
 
-	/** Captured Image Data, File Data¸¦ Àü¼Û */
+	/** Captured Image Data, File Dataë¥¼ ì „ì†¡ */
 	public void sendFileData(String fileName, OutputStream outputStream) {
-		// º¸³¾ file data¸¦ °¡Á®¿À±â
+		// ë³´ë‚¼ file dataë¥¼ ê°€ì ¸ì˜¤ê¸°
 		File sendFileContents = new File(ROOT_LOCATION + groupPK + "\\" + fileName);
 
 		try {
@@ -189,7 +160,7 @@ public class DownloadServlet extends HttpServlet {
 		}
 	}
 
-	/** ¿©·¯ File Data¸¦ Àü¼Û(ÀÚ·á Á¶»ç ÇÊ¿ä) */
+	/** ì—¬ëŸ¬ File Dataë¥¼ ì „ì†¡(ìë£Œ ì¡°ì‚¬ í•„ìš”) */
 	public void sendMultipartData(ArrayList<String> fileFullPathList) {
 		//
 		// try {
@@ -197,17 +168,17 @@ public class DownloadServlet extends HttpServlet {
 		// SERVER_SERVLET, charset);
 		// setCommonParameter(multipart);
 		//
-		// // Iterator ÅëÇÑ ÀüÃ¼ Á¶È¸
+		// // Iterator í†µí•œ ì „ì²´ ì¡°íšŒ
 		// Iterator iterator = fileFullPathList.iterator();
 		//
-		// // ¿©·¯ ÆÄÀÏÀ» ¼ø¼­´ë·Î Ã³¸®
+		// // ì—¬ëŸ¬ íŒŒì¼ì„ ìˆœì„œëŒ€ë¡œ ì²˜ë¦¬
 		// while (iterator.hasNext()) {
 		// String fileFullPath = (String) iterator.next();
 		//
 		// System.out.println("fileFullPathList: " + fileFullPath);
 		// System.out.println();
 		//
-		// // ¾÷·ÎµåÇÒ ÆÄÀÏ »ı¼º
+		// // ì—…ë¡œë“œí•  íŒŒì¼ ìƒì„±
 		// File uploadFile = new File(fileFullPath);
 		//
 		// /* uploadFilename is the name of the sequence input variable in the
@@ -228,17 +199,17 @@ public class DownloadServlet extends HttpServlet {
 		// }
 	}
 
-	/** request Msg Ãâ·Â */
+	/** request Msg ì¶œë ¥ */
 	public void requestMsgLog(HttpServletRequest request) {
 
-		/* server°¡ ¹ŞÀº request ½ÃÀÛÁÙ Á¤º¸ */
+		/* serverê°€ ë°›ì€ request ì‹œì‘ì¤„ ì •ë³´ */
 		System.out.println("==================STARTLINE==================");
 		System.out.println("Request Method: " + request.getMethod());
 		System.out.println("Request RequestURI: " + request.getRequestURI());
 		System.out.println("Request Protocol: " + request.getProtocol());
 
-		/* server°¡ ¹ŞÀº request Çì´õ Á¤º¸ */
-		/* server°¡ ¹ŞÀº ±âº»ÀûÀÎ request header msg Á¤º¸ */
+		/* serverê°€ ë°›ì€ request í—¤ë” ì •ë³´ */
+		/* serverê°€ ë°›ì€ ê¸°ë³¸ì ì¸ request header msg ì •ë³´ */
 		System.out.println("===================HEADER====================");
 		Enumeration headerNames = request.getHeaderNames();
 
@@ -266,7 +237,7 @@ public class DownloadServlet extends HttpServlet {
 		System.out.println();
 	}
 
-	/** Client·Î response Msg Àü´Ş */
+	/** Clientë¡œ response Msg ì „ë‹¬ */
 	public void responseMsgLog(HttpServletResponse response) {
 		PrintWriter writer;
 		try {
@@ -277,12 +248,12 @@ public class DownloadServlet extends HttpServlet {
 
 			writer.println("Http Post Response: " + response.toString());
 
-			/* client°¡ ¹ŞÀº response ½ÃÀÛÁÙ Á¤º¸ */
+			/* clientê°€ ë°›ì€ response ì‹œì‘ì¤„ ì •ë³´ */
 			writer.println("==================STARTLINE==================");
 			writer.println("Response Status: " + response.getStatus());
 			writer.println("Response ContentType: " + response.getContentType());
 
-			/* client°¡ ¹ŞÀº response Çì´õ Á¤º¸ */
+			/* clientê°€ ë°›ì€ response í—¤ë” ì •ë³´ */
 			writer.println("==================HEADER=====================");
 			Collection<String> headerNames = response.getHeaderNames();
 
@@ -301,3 +272,52 @@ public class DownloadServlet extends HttpServlet {
 		}
 	}
 }
+
+
+
+//// ì„œë²„ì—ì„œ groupPKë¡œ í•´ë‹¹ historyì—ì„œ downloadDataPKì¸ Contentsë¥¼ ì°¾ëŠ”ë‹¤.
+//		/* testë¥¼ ìœ„í•œ setting */
+//		Contents testcontent = new Contents();
+//
+//		/* Fileì˜ ê²½ìš° */
+//		// testcontent.setContentsPKName("2");
+//		// testcontent.setContentsSize(80451275);
+//		// testcontent.setContentsType(Contents.TYPE_FILE);
+//		// testcontent.setContentsValue("taeyeon.mp3");
+//		// testcontent.setUploadTime("2017-4-19 ë‚ ì§œ 10:19:34");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		// testcontent.setContentsPKName("3");
+//		// testcontent.setContentsSize(387);
+//		// testcontent.setContentsType(Contents.TYPE_FILE);
+//		// testcontent.setContentsValue("bbbb.jpeg");
+//		// testcontent.setUploadTime("2017-4-19 ë‚ ì§œ 10:19:34");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		/* Stringì˜ ê²½ìš° */
+//		testcontent.setContentsPKName("1");
+//		testcontent.setContentsSize(45);
+//		testcontent.setContentsType(Contents.TYPE_STRING);
+//		testcontent.setContentsValue("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+//		testcontent.setUploadTime("2017-4-19 ë‚ ì§œ 10:53:06");
+//		testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		/* Imageì˜ ê²½ìš° */
+//		// testcontent.setContentsPKName("1");
+//		// testcontent.setContentsSize(4733);
+//		// testcontent.setContentsType(Contents.TYPE_IMAGE);
+//		// testcontent.setContentsValue("");
+//		// testcontent.setUploadTime("2017-4-19 ë‚ ì§œ 11:06:04");
+//		// testcontent.setUploadUserName("gmlwjd9405@naver.com");
+//
+//		String contentsType = testcontent.getContentsType();
+//
+//		// í•´ë‹¹ downloadDataPKì˜ Contentsíƒ€ì…ì„ clientì— ì•Œë¦¼
+//		// response.setHeader("contentsType", "");
+//
+//		// í•´ë‹¹ downloadDataPKì˜ Contentsíƒ€ì…ì— ë”°ë¼ ë‹¤ë¥´ê²Œ ì²˜ë¦¬(Set response Headers)
+
+
+
+
+ 

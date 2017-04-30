@@ -7,13 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
-@ToString
 public class History {
-	private String groupPK;
+	@Getter @Setter private String groupPK;
 	private Map<String, Contents> contentsMap;
-
 	public History(String groupPK) {
 		this.groupPK = groupPK; // XXX[delf]: 사실 필요한지 잘 모르겠음
 		contentsMap = new HashMap<String, Contents>();
