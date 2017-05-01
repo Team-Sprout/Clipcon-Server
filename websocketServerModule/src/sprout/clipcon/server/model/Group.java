@@ -30,11 +30,18 @@ public class Group {
 		this.history = new History(primaryKey);
 	}
 
-	public void send(String user, Message message) throws IOException, EncodeException {
-		System.out.println("그룹 전체에게 보내다.");
+	public void sendWithout(String user, Message message) throws IOException, EncodeException {
+		System.out.println("자신을 제외한 그룹 전체에게 보내다.");
 		for (String key : users.keySet()) {
 			if (key.equals(user)) // 제외
 				continue;
+			users.get(key).getSession().getBasicRemote().sendObject(message);
+		}
+	}
+	
+	public void sendAll(Message message) throws IOException, EncodeException {
+		System.out.println("그룹 전체에게 보내다.");
+		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
 	}

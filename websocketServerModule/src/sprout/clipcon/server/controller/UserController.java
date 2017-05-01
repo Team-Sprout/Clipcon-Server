@@ -74,7 +74,7 @@ public class UserController {
 
 				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);	// 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보"
 				noti.add(Message.PARTICIPANT_NAME, userName);						// 알림 메시지에 내용 추가: 참가자 정보
-				group.send(userName, noti);
+				group.sendWithout(userName, noti);
 
 			} else {																		// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT);		// 응답 메시지에 내용 추가: 응답 결과
@@ -100,7 +100,7 @@ public class UserController {
 		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT);	// 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보"
 		noti.add(Message.PARTICIPANT_NAME, userName);							// 알림 메시지에 내용 추가: 참가자 정보
 		try {
-			group.send(userName, noti);
+			group.sendWithout(userName, noti);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (EncodeException e) {

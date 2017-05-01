@@ -24,6 +24,7 @@ import javax.servlet.http.Part;
 import javax.swing.ImageIcon;
 import javax.websocket.EncodeException;
 
+import lombok.NonNull;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
@@ -72,9 +73,10 @@ public class UploadServlet extends HttpServlet {
 		groupPK = request.getParameter("groupPK");
 		uploadTime = request.getParameter("uploadTime");
 		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
-
+		@NonNull
 		Group group = server.getGroupByPrimaryKey(groupPK);
-
+		Image imageData = null;
+		@NonNull
 		Contents uploadContents = null;
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
@@ -94,17 +96,17 @@ public class UploadServlet extends HttpServlet {
 				String paramValue = getStringFromStream(part.getInputStream());
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
-				System.out.println("stringData: " + paramValue);
-				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
-
 				group.addContents(uploadContents);
+
+				System.out.println("stringData: " + paramValue); // TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
 			break;
 
 			case "imageData":
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				System.out.println("imageData: " + imageData.toString());
 				group.addContents(uploadContents);
+				
+				imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				System.out.println("imageData: " + imageData.toString());
 			break;
 
 			// 여러 file들을 가져옴
@@ -114,13 +116,13 @@ public class UploadServlet extends HttpServlet {
 
 				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(fileName);
-				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
-
-				System.out.println("header test: " + part.getHeader("test"));
+				group.addContents(uploadContents);
 
 				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
 				getFileDatStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				group.addContents(uploadContents);
+				
+				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
+				System.out.println("header test: " + part.getHeader("test"));
 			break;
 
 			default:
@@ -131,8 +133,12 @@ public class UploadServlet extends HttpServlet {
 		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);	// 알림 메시지 생성, 알림 타입은 "데이터 업로드"
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
+		if (imageData != null) {
+			MessageParser.addImageToMessage(uploadNoti, imageData);
+		}
+
 		try {
-			group.send(userName, uploadNoti);
+			group.sendAll(uploadNoti);
 		} catch (EncodeException e) {
 			e.printStackTrace();
 		}
@@ -205,6 +211,14 @@ public class UploadServlet extends HttpServlet {
 		return ImageData;
 	}
 
+	// public ImageIcon getByteArrayByImage(Image image) throws IOException {
+	// // ImageIO.write(im, formatName, output)
+	// ByteArrayOutputStream out = new ByteArrayOutputStream();
+	// ImageIO.write(image, "JPEG", out);
+	// byte[] imageBytes = out.toByteArray();
+	// BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imageBytes));
+	// }
+
 	/** File Data를 수신하는 Stream */
 	// 가 아니라 파일화 하는 역할
 	public void getFileDatStream(InputStream stream, String groupPK, String fileName) throws IOException {
@@ -267,23 +281,15 @@ public class UploadServlet extends HttpServlet {
 		}
 	}
 
-	/** Image를 Resizing한 ImageIcon으로 return */
-	public ImageIcon getResizingImageIcon(Image imageData) {
-		// FIXME: 이미지의 크기를 줄일 때, 비율을 맞출 것
-		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-		ImageIcon resizingImageIcon = new ImageIcon(imageData);
-
-		return resizingImageIcon;
-	}
-//	O
-//	private String getStringFromBitmap(Image bitmapPicture) {
-//		String encodedImage;
-//		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-//		bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
-//		byte[] b = byteArrayBitmapStream.toByteArray();
-//		encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-//		return encodedImage;
-//	}
+	// O
+	// private String getStringFromBitmap(Image bitmapPicture) {
+	// String encodedImage;
+	// ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+	// bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+	// byte[] b = byteArrayBitmapStream.toByteArray();
+	// encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+	// return encodedImage;
+	// }
 
 	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌
 }

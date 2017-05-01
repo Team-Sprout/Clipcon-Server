@@ -25,10 +25,10 @@ public class Contents {
 	private String uploadTime;
 
 	// String Type: String°ª, File Type: FileOriginName
-	private String contentsValue;
+	private String contentsValue = "";
 
 	private static int primaryKey = 0;
-	
+
 	private Map<String, String[]> filePaths;
 	public static final int FILE_PATH = 0;
 	public static final int FILE_NAME = 1;
