@@ -3,6 +3,7 @@ package sprout.clipcon.server.model;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class Contents {
 	public final static String TYPE_STRING = "STRING";
 	public final static String TYPE_IMAGE = "IMAGE";
 	public final static String TYPE_FILE = "FILE";
+	public final static String TYPE_MULTIPLE_FILE = "MULTIPLE_FILE";
 
 	private String contentsType;
 	private long contentsSize;
@@ -24,7 +26,7 @@ public class Contents {
 	private String uploadUserName;
 	private String uploadTime;
 
-	// String Type: String값, File Type: FileOriginName
+	// String Type: String값, (single) File Type: FileOriginName
 	private String contentsValue;
 
 	private static int primaryKey = 0;
@@ -38,12 +40,17 @@ public class Contents {
 		this.uploadUserName = userEmail;
 		this.uploadTime = time;
 		this.contentsSize = size;
+		
+		System.out.println("생성자 드루옴~~~");
 
-		if (contentsType.equals(TYPE_FILE)) {
+		if (contentsType.equals(TYPE_MULTIPLE_FILE)) {
 			filePaths = Collections.synchronizedMap(new HashMap<String, String[]>());
+			System.out.println("TYPE_MULTIPLE_FILE인 생성자 드루옴~~~");
 		}
 	}
 
+	/** @param path 상대경로
+	 * @param origineFileName 파일명 */
 	public String addFilePath(String path, String origineFileName) {
 		String key = Integer.toString(++primaryKey);
 		String[] tmp = { path, origineFileName };
@@ -60,6 +67,17 @@ public class Contents {
 	}
 
 	public String getFilePathAndName(String key) {
-		return (getFilePath(key) + File.pathSeparator + getFileName(key));
+		return (getFilePath(key) + File.separator + getFileName(key));
+	}
+	
+	/** TEST */
+	public void printAllFileInfo() {
+		// TODO Auto-generated method stub
+		Iterator itr = filePaths.keySet().iterator();
+
+		while (itr.hasNext()) {
+			// 작성 중~~~~~~~~~~~
+		}
+
 	}
 }

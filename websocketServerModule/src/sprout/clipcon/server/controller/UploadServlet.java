@@ -43,23 +43,26 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	// 업로드 파일을 저장할 위치
-	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
-	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
-	// 업로드한 파일을 저장할 폴더
-	private File receiveFolder;
+	 private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
+//	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 테스트 경로1
 
 	private String userName = null;
 	private String groupPK = null;
 	private String uploadTime = null;
+	private String createFolder = null;
 	private boolean flag = false;
+	
+	private long multipleFileTotalSize = 0;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoPost시작");
 
@@ -71,18 +74,22 @@ public class UploadServlet extends HttpServlet {
 		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = request.getParameter("uploadTime");
-		System.out.println("<Parameter> userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
+		createFolder = request.getParameter("createFolder");
+		System.out.println(
+				"<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + ", createFolder: " + createFolder + "\n");
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
-
+		
+		Contents multipartUploadContents = null;
 		Contents uploadContents = null;
+		
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
 
 			/*
 			 * To find out file name, parse header value of content-disposition e.g. form-data; name="file"; filename=""
 			 */
-			System.out.println("<headerName: headerValue>");
+			System.out.println("\n<headerName: headerValue>");
 			for (String headerName : part.getHeaderNames()) {
 				System.out.println(headerName + ": " + part.getHeader(headerName));
 			}
@@ -95,41 +102,84 @@ public class UploadServlet extends HttpServlet {
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
 				System.out.println("stringData: " + paramValue);
-				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
-
+				
 				group.addContents(uploadContents);
-			break;
+				// TODO[delf]: text의 크기가 일정 이상이면 파일로 저장
+				break;
 
 			case "imageData":
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
+						uploadContents.getContentsPKName());
 				System.out.println("imageData: " + imageData.toString());
+				
 				group.addContents(uploadContents);
-			break;
+				break;
 
-				// 여러 file들을 가져옴
-				case "multipartFileData":
+			// 여러 file들을 가져옴
+			case "multipartFileData":
 				String fileName = getFilenameInHeader(part.getHeader("Content-Disposition"));
+				String relativeFilePath = part.getHeader("Content-RelativePath");
 
 				String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+				createFolder(saveFilePath); // 업로드한 파일을 저장할 그룹 폴더 생성
 
-				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
-				uploadContents.setContentsValue(fileName);
-				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath);
-
-				System.out.println("header test: " + part.getHeader("test"));
-
-				/* groupPK 폴더에 실제 File(파일명: 고유키) 저장 */
-				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				group.addContents(uploadContents);
-			break;
-
+				/* file data가 하나인 경우
+				 * 내부 폴더 생성 X */
+				if(createFolder.equals("FALSE")){
+					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
+					uploadContents.setContentsValue(fileName);
+					
+					group.addContents(uploadContents);
+					
+					System.out.println(uploadContents.getContentsPKName());
+					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath + ", relativeFilePath: " + relativeFilePath);
+					
+					// groupPK 폴더에 실제 File(파일명: 고유키) 저장
+					getFileDataStream(part.getInputStream(), saveFilePath, uploadContents.getContentsPKName());
+					break;
+				}
+				
+				/* file data가 여러 개인 경우
+				 * 내부 폴더 생성 O, 각 data를 Contents에 추가 */
+				if(uploadContents == null){
+					uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
+					multipartUploadContents = group.addContents(uploadContents);
+				}
+				System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath + "relativeFilePath: " + relativeFilePath);
+				multipartUploadContents.addFilePath(relativeFilePath, fileName);
+				
+				multipartUploadContents.printAllFileInfo();
+				
+				
+				saveFilePath = saveFilePath + File.separator + uploadContents.getContentsPKName();
+				System.out.println("내부 폴더 이름: " + saveFilePath);
+				createFolder(saveFilePath); // 내부 폴더 생성
+				
+				// groupPK 폴더의 내부 폴더에 실제 File(파일명: 고유키) 저장
+				getFileDataStream(part.getInputStream(), saveFilePath, uploadContents.getContentsPKName());
+				
+				break;
+				
+			// 여러 directory 정보들을 가져옴
+			case "directoryData":
+				if(uploadContents == null){
+					uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
+					multipartUploadContents = group.addContents(uploadContents);
+				}
+				String directoryName = getStringFromStream(part.getInputStream());
+				System.out.println("directoryName: " + directoryName);
+				multipartUploadContents.addFilePath(directoryName, null);
+				
+				multipartUploadContents.printAllFileInfo();
+				
+				break;
 			default:
 				System.out.println("어떤 형식에도 속하지 않음.");
 			}
-
 		}
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);	// 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
 		try {
@@ -175,7 +225,8 @@ public class UploadServlet extends HttpServlet {
 		byte[] imageInByte;
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
 
-		createFileReceiveFolder(saveFilePath); // 그룹 폴더 존재 확인
+		// 업로드한 파일을 저장할 그룹 폴더 생성
+		createFolder(saveFilePath);
 
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
 			byte[] buffer = new byte[0xFFFF]; // 65536
@@ -206,15 +257,12 @@ public class UploadServlet extends HttpServlet {
 		return ImageData;
 	}
 
-	/** File Data를 수신하는 Stream */
+	/** 수신받은 File Data를 수신하는 Stream */
 	// 가 아니라 파일화 하는 역할
-	public void getFileDataStream(InputStream stream, String groupPK, String fileName) throws IOException {
+	public void getFileDataStream(InputStream stream, String saveFilePath, String fileName) throws IOException {
 
 		Date start = new Date();
-		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
-		String saveFileFullPath = saveFilePath + "\\" + fileName;
-
-		createFileReceiveFolder(saveFilePath); // 그룹 폴더 존재 확인
+		String saveFileFullPath = saveFilePath + File.separator + fileName;
 
 		// opens an output stream to save into file
 		FileOutputStream fileOutputStream = new FileOutputStream(saveFileFullPath);
@@ -256,15 +304,16 @@ public class UploadServlet extends HttpServlet {
 		return fileName;
 	}
 
-	// XXX: 모델 구현 시, 확인하기
-	/** 업로드한 파일을 저장할 그룹 폴더 생성 */
-	private void createFileReceiveFolder(String saveFilePath) {
-		receiveFolder = new File(saveFilePath);
-		System.out.println("폴더 생성");
-		// C:\\Program Files에 LinKlipboard폴더가 존재하지 않으면
+	// XXX: 모델 구현 시, 확인하기 
+	/** Folder 생성 메서드
+	 * @param saveFilePath 이 이름으로 폴더 생성 */
+	private void createFolder(String folderName) {
+		File receiveFolder = new File(folderName);
+		
+		// 저장할 그룹 폴더가 존재하지 않으면
 		if (!receiveFolder.exists()) {
 			receiveFolder.mkdir(); // 폴더 생성
-			System.out.println("------------------" + saveFilePath + " 폴더 생성");
+			System.out.println("------------------------------------" + folderName + " 폴더 생성");
 		}
 	}
 
@@ -276,15 +325,15 @@ public class UploadServlet extends HttpServlet {
 
 		return resizingImageIcon;
 	}
-//	O
-//	private String getStringFromBitmap(Image bitmapPicture) {
-//		String encodedImage;
-//		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-//		bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
-//		byte[] b = byteArrayBitmapStream.toByteArray();
-//		encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-//		return encodedImage;
-//	}
+	// O
+	// private String getStringFromBitmap(Image bitmapPicture) {
+	// String encodedImage;
+	// ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+	// bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+	// byte[] b = byteArrayBitmapStream.toByteArray();
+	// encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+	// return encodedImage;
+	// }
 
 	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌
 }
