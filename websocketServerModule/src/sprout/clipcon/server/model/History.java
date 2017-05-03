@@ -8,7 +8,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 public class History {
-	@Getter @Setter private String groupPK;
+	@Getter
+	@Setter
+	private String groupPK;
 	private Map<String, Contents> contentsMap;
 
 	// 그룹내의 각 Data를 구분하는 고유키값
@@ -19,10 +21,12 @@ public class History {
 		contentsMap = new HashMap<String, Contents>();
 	}
 
-	/** 새로운 데이터가 업로드되면 히스토리에 add */
-	public void addContents(Contents contents) {
+	/** 새로운 데이터가 업로드되면 히스토리에 add한 후 Contents를 return */
+	public Contents addContents(Contents contents) {
 		contents.setContentsPKName(Integer.toString(++contentsPKValue));
 		contentsMap.put(contents.getContentsPKName(), contents);
+
+		return contentsMap.get(contents.getContentsPKName());
 	}
 
 	/** Data를 구분하는 고유키값과 일치하는 Contents를 return */

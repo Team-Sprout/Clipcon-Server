@@ -18,7 +18,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 	}
 
 	public Message decode(String incommingMessage) throws DecodeException {
-		System.out.println("서버는 받은 string 확인: " + incommingMessage);
+		System.out.println("=============== 서버는 받은 string 확인 ===============\n" + incommingMessage + "\n---------------------------------------------------");
 		Message message = new Message().setJson(incommingMessage);
 		// message.setJson(incommingMessage);
 		
