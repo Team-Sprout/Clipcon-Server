@@ -29,19 +29,23 @@ public class Contents {
 	// String Type: String값, (single) File Type: FileOriginName
 	private String contentsValue;
 
-	private static int primaryKey = 0;
+	private int primaryKey = 0;
 	
 	private Map<String, String[]> filePaths;
 	public static final int FILE_PATH = 0;
 	public static final int FILE_NAME = 1;
 
+	public Contents() {
+		System.out.println("\n디폴트 생성자 드루옴~~~");
+	}
+	
 	public Contents(String type, String userEmail, String time, long size) {
 		this.contentsType = type;
 		this.uploadUserName = userEmail;
 		this.uploadTime = time;
 		this.contentsSize = size;
 		
-		System.out.println("생성자 드루옴~~~");
+		System.out.println("\n생성자 드루옴~~~");
 
 		if (contentsType.equals(TYPE_MULTIPLE_FILE)) {
 			filePaths = Collections.synchronizedMap(new HashMap<String, String[]>());
@@ -69,15 +73,18 @@ public class Contents {
 	public String getFilePathAndName(String key) {
 		return (getFilePath(key) + File.separator + getFileName(key));
 	}
-	
+
 	/** TEST */
 	public void printAllFileInfo() {
-		// TODO Auto-generated method stub
-		Iterator itr = filePaths.keySet().iterator();
+		if (filePaths != null) {
+			Iterator<String> itr = filePaths.keySet().iterator();
+			System.out.println("------------------------------------Contents 안의 파일 내용 출력");
 
-		while (itr.hasNext()) {
-			// 작성 중~~~~~~~~~~~
+			while (itr.hasNext()) {
+				String key = itr.next();
+				String[] tmp = filePaths.get(key);
+				System.out.println("key: " + key + ", value: " + tmp[0] + "||" + tmp[1]);
+			}
 		}
-
 	}
 }
