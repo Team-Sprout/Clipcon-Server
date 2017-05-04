@@ -24,13 +24,14 @@ import javax.servlet.http.Part;
 import javax.swing.ImageIcon;
 import javax.websocket.EncodeException;
 
+import lombok.NonNull;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
 
-/* maxFileSize: ÃÖ´ë ÆÄÀÏ Å©±â(100MB)
- * fileSizeThreshold: 1MB ÀÌÇÏÀÇ ÆÄÀÏÀº ¸Þ¸ð¸®¿¡¼­ ¹Ù·Î »ç¿ë
+/* maxFileSize: ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½(100MB)
+ * fileSizeThreshold: 1MB ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¸ð¸®¿ï¿½ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½
  * maxRequestSize:  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
@@ -39,12 +40,12 @@ public class UploadServlet extends HttpServlet {
 	private Server server = Server.getInstance();
 
 	public UploadServlet() {
-		System.out.println("UploadServlet »ý¼º");
+		System.out.println("UploadServlet ï¿½ï¿½ï¿½ï¿½");
 	}
 
-	// ¾÷·Îµå ÆÄÀÏÀ» ÀúÀåÇÒ À§Ä¡
-	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // Å×½ºÆ® °æ·Î2
-	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // Å×½ºÆ® °æ·Î1
+	// ï¿½ï¿½ï¿½Îµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
+	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // ï¿½×½ï¿½Æ® ï¿½ï¿½ï¿½2
+	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // ï¿½×½ï¿½Æ® ï¿½ï¿½ï¿½1
 
 	private String userName = null;
 	private String groupPK = null;
@@ -55,16 +56,14 @@ public class UploadServlet extends HttpServlet {
 	private long multipleFileTotalSize = 0;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// requestMsgLog(request);
-		System.out.println("================================================================\ndoPost½ÃÀÛ");
+		System.out.println("================================================================\ndoPostï¿½ï¿½ï¿½ï¿½");
 
 		Date sd = new Date();
 		long len = request.getContentLengthLong();
@@ -75,9 +74,7 @@ public class UploadServlet extends HttpServlet {
 		groupPK = request.getParameter("groupPK");
 		uploadTime = request.getParameter("uploadTime");
 		createFolder = request.getParameter("createFolder");
-		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: "
-				+ uploadTime + ", createFolder: " + createFolder + "\n");
-
+		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + ", createFolder: " + createFolder + "\n");
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents multipartUploadContents = new Contents();
@@ -105,30 +102,28 @@ public class UploadServlet extends HttpServlet {
 
 				System.out.println("stringData: " + paramValue);
 
-				// TODO[delf]: textÀÇ Å©±â°¡ ÀÏÁ¤ ÀÌ»óÀÌ¸é ÆÄÀÏ·Î ÀúÀå
-				break;
+			break;
 
 			case "imageData":
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				group.addContents(uploadContents);
 
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
-						uploadContents.getContentsPKName());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 
 				System.out.println("imageData: " + imageData.toString());
 
-				break;
+			break;
 
-			// ¿©·¯ fileµéÀ» °¡Á®¿È
+			// ï¿½ï¿½ï¿½ï¿½ fileï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			case "multipartFileData":
 				String fileName = getFilenameInHeader(part.getHeader("Content-Disposition"));
 				String relativeFilePath = part.getHeader("Content-RelativePath");
 
-				String saveFilePath = RECEIVE_LOCATION + groupPK; // »ç¿ëÀÚ°¡ ¼ÓÇÑ ±×·ìÀÇ Æú´õ¿¡ ÀúÀå
-				createFolder(saveFilePath); // ¾÷·ÎµåÇÑ ÆÄÀÏÀ» ÀúÀåÇÒ ±×·ì Æú´õ »ý¼º
+				String saveFilePath = RECEIVE_LOCATION + groupPK; // ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+				createFolder(saveFilePath); // ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 				/*
-				 * file data°¡ ÇÏ³ªÀÎ °æ¿ì ³»ºÎ Æú´õ »ý¼º X
+				 * file dataï¿½ï¿½ ï¿½Ï³ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ X
 				 */
 				if (createFolder.equals("FALSE")) {
 					uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
@@ -137,39 +132,36 @@ public class UploadServlet extends HttpServlet {
 					group.addContents(uploadContents);
 
 					System.out.println(uploadContents.getContentsPKName());
-					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath
-							+ ", relativeFilePath: " + relativeFilePath);
+					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath + ", relativeFilePath: " + relativeFilePath);
 
-					// groupPK Æú´õ¿¡ ½ÇÁ¦ File(ÆÄÀÏ¸í: °íÀ¯Å°) ÀúÀå
+					// groupPK ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ File(ï¿½ï¿½ï¿½Ï¸ï¿½: ï¿½ï¿½ï¿½ï¿½Å°) ï¿½ï¿½ï¿½ï¿½
 					getFileDataStream(part.getInputStream(), saveFilePath, uploadContents.getContentsPKName());
 				}
 
 				/*
-				 * file data°¡ ¿©·¯ °³ÀÎ °æ¿ì ³»ºÎ Æú´õ »ý¼º O, °¢ data¸¦ Contents¿¡ Ãß°¡
+				 * file dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ O, ï¿½ï¿½ dataï¿½ï¿½ Contentsï¿½ï¿½ ï¿½ß°ï¿½
 				 */
 				else if (createFolder.equals("TRUE")) {
 					if (uploadContents == null) {
-						uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime,
-								part.getSize());
+						uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
 						multipartUploadContents = group.addContents(uploadContents);
 					}
-					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath
-							+ "relativeFilePath: " + relativeFilePath);
+					System.out.println("fileName: " + fileName + ", saveFilePath: " + saveFilePath + "relativeFilePath: " + relativeFilePath);
 					String filePKName = multipartUploadContents.addFilePath(relativeFilePath, fileName);
 
 					multipleFileTotalSize = multipleFileTotalSize + part.getSize();
 					multipartUploadContents.setContentsSize(multipleFileTotalSize);
 
 					saveFilePath = saveFilePath + File.separator + uploadContents.getContentsPKName();
-					System.out.println("³»ºÎ Æú´õ ÀÌ¸§: " + saveFilePath);
-					createFolder(saveFilePath); // ³»ºÎ Æú´õ »ý¼º
+					System.out.println("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½: " + saveFilePath);
+					createFolder(saveFilePath); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-					// groupPK Æú´õÀÇ ³»ºÎ Æú´õ¿¡ ½ÇÁ¦ File(ÆÄÀÏ¸í: °íÀ¯Å°) ÀúÀå
+					// groupPK ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ File(ï¿½ï¿½ï¿½Ï¸ï¿½: ï¿½ï¿½ï¿½ï¿½Å°) ï¿½ï¿½ï¿½ï¿½
 					getFileDataStream(part.getInputStream(), saveFilePath, filePKName);
 				}
-				break;
+			break;
 
-			// ¿©·¯ directory Á¤º¸µéÀ» °¡Á®¿È
+			// ï¿½ï¿½ï¿½ï¿½ directory ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			case "directoryData":
 				if (uploadContents == null) {
 					uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
@@ -180,34 +172,34 @@ public class UploadServlet extends HttpServlet {
 
 				System.out.println("directoryName: " + directoryName);
 				multipartUploadContents.addFilePath(directoryName, null);
-				break;
+			break;
 
 			default:
-				System.out.println("¾î¶² Çü½Ä¿¡µµ ¼ÓÇÏÁö ¾ÊÀ½.");
+				System.out.println("ï¿½î¶² ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.");
 			}
 		}
 		multipartUploadContents.printAllFileInfo(); // TEST
 
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // ¾Ë¸² ¸Þ½ÃÁö »ý¼º, ¾Ë¸² Å¸ÀÔÀº "µ¥ÀÌÅÍ ¾÷·Îµå"
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // ï¿½Ë¸ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Ë¸ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½"
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
 		try {
-			group.send(userName, uploadNoti);
+			group.sendAll(uploadNoti);
 		} catch (EncodeException e) {
 			e.printStackTrace();
 		}
 		System.out.println();
 
-		System.out.println("¼­ºí¸´ ³¡");
+		System.out.println("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½");
 		Date ed = new Date();
 		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
-		System.out.println("¼Ò¿ä½Ã°£ = " + t + "ÃÊ");
-		System.out.print("¼Óµµ = " + (float) len / t + " kb/s (");
+		System.out.println("ï¿½Ò¿ï¿½Ã°ï¿½ = " + t + "ï¿½ï¿½");
+		System.out.print("ï¿½Óµï¿½ = " + (float) len / t + " kb/s (");
 		System.out.println((float) len / t / (1024 * 1024) + " mb/s)");
 		// responseMsgLog(response);
 	}
 
-	/** String Data¸¦ ¼ö½ÅÇÏ´Â Stream */
+	/** String Dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ Stream */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 		StringBuilder stringBuilder = new StringBuilder();
@@ -229,12 +221,12 @@ public class UploadServlet extends HttpServlet {
 		return stringBuilder.toString();
 	}
 
-	/** Image Data¸¦ ¼ö½ÅÇÏ´Â Stream */
+	/** Image Dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ Stream */
 	public Image getImageDataStream(InputStream stream, String groupPK, String imagefileName) throws IOException {
 		byte[] imageInByte;
-		String saveFilePath = RECEIVE_LOCATION + groupPK; // »ç¿ëÀÚ°¡ ¼ÓÇÑ ±×·ìÀÇ Æú´õ¿¡ ÀúÀå
+		String saveFilePath = RECEIVE_LOCATION + groupPK; // ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-		// ¾÷·ÎµåÇÑ ÆÄÀÏÀ» ÀúÀåÇÒ ±×·ì Æú´õ »ý¼º
+		// ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		createFolder(saveFilePath);
 
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
@@ -258,16 +250,26 @@ public class UploadServlet extends HttpServlet {
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageInByte);
 		BufferedImage bImageFromConvert = ImageIO.read(byteArrayInputStream);
 
-		// file ÇüÅÂ·Î ÀúÀå
+		// file ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½
 		ImageIO.write(bImageFromConvert, "png", new File(saveFilePath, imagefileName));
 
-		// image °´Ã¼·Î º¯È¯
+		// image ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½È¯
 		Image ImageData = (Image) bImageFromConvert;
 		return ImageData;
 	}
 
-	/** ¼ö½Å¹ÞÀº File Data¸¦ ¼ö½ÅÇÏ´Â Stream */
-	// °¡ ¾Æ´Ï¶ó ÆÄÀÏÈ­ ÇÏ´Â ¿ªÇÒ
+	// public ImageIcon getByteArrayByImage(Image image) throws IOException {
+	// // ImageIO.write(im, formatName, output)
+	// ByteArrayOutputStream out = new ByteArrayOutputStream();
+	// ImageIO.write(image, "JPEG", out);
+	// byte[] imageBytes = out.toByteArray();
+	// BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imageBytes));
+	// }
+
+	/** File Dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ Stream */
+	/** ï¿½ï¿½ï¿½Å¹ï¿½ï¿½ï¿½ File Dataï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ Stream */
+
+	// ï¿½ï¿½ ï¿½Æ´Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½È­ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½
 	public void getFileDataStream(InputStream stream, String saveFilePath, String fileName) throws IOException {
 
 		Date start = new Date();
@@ -287,7 +289,7 @@ public class UploadServlet extends HttpServlet {
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
 			fileOutputStream.flush();
-			System.out.println("·çÇÁ È½¼ö = " + testCnt);
+			System.out.println("ï¿½ï¿½ï¿½ï¿½ È½ï¿½ï¿½ = " + testCnt);
 			flag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -300,10 +302,10 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 		Date end = new Date();
-		System.out.println("¼Ò¿ä½Ã°£: " + (end.getTime() - start.getTime()));
+		System.out.println("ï¿½Ò¿ï¿½Ã°ï¿½: " + (end.getTime() - start.getTime()));
 	}
 
-	/** Request Header "content-disposition"¿¡¼­ filename ÃßÃâ */
+	/** Request Header "content-disposition"ï¿½ï¿½ï¿½ï¿½ filename ï¿½ï¿½ï¿½ï¿½ */
 	private String getFilenameInHeader(String requestHeader) {
 		int beginIndex = requestHeader.indexOf("filename") + 10;
 		int endIndex = requestHeader.length() - 1;
@@ -313,31 +315,23 @@ public class UploadServlet extends HttpServlet {
 		return fileName;
 	}
 
-	// XXX: ¸ðµ¨ ±¸Çö ½Ã, È®ÀÎÇÏ±â
+	// XXX: ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, È®ï¿½ï¿½ï¿½Ï±ï¿½
 	/**
-	 * Folder »ý¼º ¸Þ¼­µå
+	 * Folder ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½
 	 * 
 	 * @param saveFilePath
-	 *            ÀÌ ÀÌ¸§À¸·Î Æú´õ »ý¼º
+	 *            ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	 */
 	private void createFolder(String folderName) {
 		File receiveFolder = new File(folderName);
 
-		// ÀúÀåÇÒ ±×·ì Æú´õ°¡ Á¸ÀçÇÏÁö ¾ÊÀ¸¸é
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (!receiveFolder.exists()) {
-			receiveFolder.mkdir(); // Æú´õ »ý¼º
-			System.out.println("------------------------------------" + folderName + " Æú´õ »ý¼º");
+			receiveFolder.mkdir(); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+			System.out.println("------------------------------------" + folderName + " ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
 		}
 	}
 
-	/** Image¸¦ ResizingÇÑ ImageIconÀ¸·Î return */
-	public ImageIcon getResizingImageIcon(Image imageData) {
-		// FIXME: ÀÌ¹ÌÁöÀÇ Å©±â¸¦ ÁÙÀÏ ¶§, ºñÀ²À» ¸ÂÃâ °Í
-		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-		ImageIcon resizingImageIcon = new ImageIcon(imageData);
-
-		return resizingImageIcon;
-	}
 	// O
 	// private String getStringFromBitmap(Image bitmapPicture) {
 	// String encodedImage;
@@ -348,5 +342,16 @@ public class UploadServlet extends HttpServlet {
 	// return encodedImage;
 	// }
 
-	// XXX: ¿©±â ÀÖ´ø ·Î±× ÄÚµå ÁöÀúºÐÇØ¼­ µû·Î TmpLog·Î »­
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Î±ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ TmpLogï¿½ï¿½ ï¿½ï¿½
 }
+// O
+// private String getStringFromBitmap(Image bitmapPicture) {
+// String encodedImage;
+// ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+// bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+// byte[] b = byteArrayBitmapStream.toByteArray();
+// encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+// return encodedImage;
+// }
+
+// XXX: ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Î±ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ TmpLogï¿½ï¿½ ï¿½ï¿½

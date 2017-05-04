@@ -26,8 +26,8 @@ public class Contents {
 	private String uploadUserName;
 	private String uploadTime;
 
-	// String Type: String°ª, (single) File Type: FileOriginName
-	private String contentsValue;
+	private String contentsValue = "";
+	// String Type: Stringï¿½ï¿½, (single) File Type: FileOriginName
 
 	private int primaryKey = 0;
 	
@@ -36,7 +36,7 @@ public class Contents {
 	public static final int FILE_NAME = 1;
 
 	public Contents() {
-		System.out.println("\nµðÆúÆ® »ý¼ºÀÚ µå·ç¿È~~~");
+		System.out.println("\nï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½~~~");
 	}
 	
 	public Contents(String type, String userEmail, String time, long size) {
@@ -45,16 +45,16 @@ public class Contents {
 		this.uploadTime = time;
 		this.contentsSize = size;
 		
-		System.out.println("\n»ý¼ºÀÚ µå·ç¿È~~~");
+		System.out.println("\nï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½~~~");
 
 		if (contentsType.equals(TYPE_MULTIPLE_FILE)) {
 			filePaths = Collections.synchronizedMap(new HashMap<String, String[]>());
-			System.out.println("TYPE_MULTIPLE_FILEÀÎ »ý¼ºÀÚ µå·ç¿È~~~");
+			System.out.println("TYPE_MULTIPLE_FILEï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½~~~");
 		}
 	}
 
-	/** @param path »ó´ë°æ·Î
-	 * @param origineFileName ÆÄÀÏ¸í */
+	/** @param path ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * @param origineFileName ï¿½ï¿½ï¿½Ï¸ï¿½ */
 	public String addFilePath(String path, String origineFileName) {
 		String key = Integer.toString(++primaryKey);
 		String[] tmp = { path, origineFileName };
@@ -78,7 +78,7 @@ public class Contents {
 	public void printAllFileInfo() {
 		if (filePaths != null) {
 			Iterator<String> itr = filePaths.keySet().iterator();
-			System.out.println("------------------------------------Contents ¾ÈÀÇ ÆÄÀÏ ³»¿ë Ãâ·Â");
+			System.out.println("------------------------------------Contents ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½");
 
 			while (itr.hasNext()) {
 				String key = itr.next();
