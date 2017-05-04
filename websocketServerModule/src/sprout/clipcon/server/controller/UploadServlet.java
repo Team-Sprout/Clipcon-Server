@@ -291,5 +291,5 @@ public class UploadServlet extends HttpServlet {
 	// return encodedImage;
 	// }
 
-	// XXX: 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌
+	// 여기 있던 로그 코드 지저분해서 따로 TmpLog로 뺌
 }
