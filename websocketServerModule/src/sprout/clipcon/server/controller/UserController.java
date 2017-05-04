@@ -86,7 +86,7 @@ public class UserController {
 			System.out.println("예외사항");
 				break;
 		}
-		System.out.println("===== 클라이언트에게 보낸 메시지 =====\n" + responseMsg + "\n============================");
+		System.out.println("============ 클라이언트에게 보낸 메시지 ============\n" + responseMsg + "\n---------------------------------------------------");
 		sendMessage(session, responseMsg);					 // 전송
 	}
 

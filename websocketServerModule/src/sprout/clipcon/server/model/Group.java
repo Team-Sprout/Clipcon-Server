@@ -62,8 +62,7 @@ public class Group {
 	}
 
 	public Contents addContents(Contents contents) {
-		history.addContents(contents);
-		return contents;
+		return history.addContents(contents);
 	}
 
 	public Contents getContents(String key) {
