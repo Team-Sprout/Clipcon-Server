@@ -31,16 +31,16 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out.println("ÀÚ½ÅÀ» Á¦¿ÜÇÑ ±×·ì ÀüÃ¼¿¡°Ô º¸³»´Ù.");
+		System.out.println("ìì‹ ì„ ì œì™¸í•œ ê·¸ë£¹ ì „ì²´ì—ê²Œ ë³´ë‚´ë‹¤.");
 		for (String key : users.keySet()) {
-			if (key.equals(user)) // Á¦¿Ü
+			if (key.equals(user)) // ì œì™¸
 				continue;
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
 	}
 	
 	public void sendAll(Message message) throws IOException, EncodeException {
-		System.out.println("±×·ì ÀüÃ¼¿¡°Ô º¸³»´Ù.");
+		System.out.println("ê·¸ë£¹ ì „ì²´ì—ê²Œ ë³´ë‚´ë‹¤.");
 		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
@@ -49,7 +49,7 @@ public class Group {
 	public String addUser(String name, UserController session) {
 		String tmpName = getTempUsername();
 		users.put(tmpName, session);
-		System.out.println("»õ À¯Àú°¡ ±×·ì¿¡ ÀÔÀå");
+		System.out.println("ìƒˆ ìœ ì €ê°€ ê·¸ë£¹ì— ì…ì¥");
 		return tmpName;
 	}
 

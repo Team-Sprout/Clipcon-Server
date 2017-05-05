@@ -11,7 +11,7 @@ import sprout.clipcon.server.model.Group;
 
 public class Server {
 	private static Server uniqueInstance;
-	/** ¼­¹ö ³» Á¸ÀçÇÏ´Â ±×·ìµé */
+	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
 	private Server() {
@@ -37,9 +37,9 @@ public class Server {
 	}
 
 	/**
-	 * ÇØ´ç ±×·ì¿¡ »ç¿ëÀÚ Ãß°¡
-	 * @param key ±×·ì °íÀ¯ Å°
-	 * @return ±×·ìÀÇ Á¸Àç ¿©ºÎ. ±×·ìÀÌ Á¸ÀçÇÏ¸é true, ±×·¸Áö ¾ÊÀ¸¸é false */
+	 * í•´ë‹¹ ê·¸ë£¹ì— ì‚¬ìš©ì ì¶”ê°€
+	 * @param key ê·¸ë£¹ ê³ ìœ  í‚¤
+	 * @return ê·¸ë£¹ì˜ ì¡´ì¬ ì—¬ë¶€. ê·¸ë£¹ì´ ì¡´ì¬í•˜ë©´ true, ê·¸ë ‡ì§€ ì•Šìœ¼ë©´ false */
 	public Group getGroupByPrimaryKey(String key) {
 		Group targetGroup = groups.get(key);
 		if (targetGroup != null) {
@@ -48,20 +48,20 @@ public class Server {
 	}
 
 	/**
-	 * ±×·ì »ı¼º ÈÄ ¼­¹öÀÇ ±×·ì ¸ñ·Ï¿¡ Ãß°¡ 
-	 * @return »ı¼ºµÈ ±×·ì °´Ã¼ */
+	 * ê·¸ë£¹ ìƒì„± í›„ ì„œë²„ì˜ ê·¸ë£¹ ëª©ë¡ì— ì¶”ê°€ 
+	 * @return ìƒì„±ëœ ê·¸ë£¹ ê°ì²´ */
 	public Group createGroup() {
 		String groupKey = generatePrimaryKey(5);
-		System.out.println("ÇÒ´çµÈ ±×·ì Å°´Â " + groupKey);
+		System.out.println("í• ë‹¹ëœ ê·¸ë£¹ í‚¤ëŠ” " + groupKey);
 		Group newGroup = new Group(groupKey);
 		groups.put(groupKey, newGroup);
 		return newGroup;
 	}
 
 	/**
-	 * ¿µ¾î ´ë¹®ÀÚ, ¼Ò¹®ÀÚ, ¼ıÀÚ·Î È¥ÇÕµÈ ¹®ÀÚ¿­ »ı¼º.
-	 * @param length »ı¼ºµÉ ¹®ÀÚ¿­ ±æÀÌ 
-	 * @return »ı¼ºµÈ ¹®ÀÚ¿­ */
+	 * ì˜ì–´ ëŒ€ë¬¸ì, ì†Œë¬¸ì, ìˆ«ìë¡œ í˜¼í•©ëœ ë¬¸ìì—´ ìƒì„±.
+	 * @param length ìƒì„±ë  ë¬¸ìì—´ ê¸¸ì´ 
+	 * @return ìƒì„±ëœ ë¬¸ìì—´ */
 	private String generatePrimaryKey(int length) {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
@@ -90,9 +90,9 @@ public class Server {
 			for (int i = 0; i < fileList.length; i++) {
 				File file = fileList[i];
 				if (file.isFile()) {
-					System.out.println("ÆÄÀÏ ÀÌ¸§ = " + file.getPath());
+					System.out.println("File name = " + file.getPath());
 				} else if (file.isDirectory()) {
-					System.out.println("µğ·º ÀÌ¸§ = " + file.getPath());
+					System.out.println("Dir name = " + file.getPath());
 					subDirList(file.getCanonicalPath().toString());
 				}
 			}

@@ -13,15 +13,15 @@ public class History {
 	private String groupPK;
 	private Map<String, Contents> contentsMap;
 
-	// ±×·ì³»ÀÇ °¢ Data¸¦ ±¸ºĞÇÏ´Â °íÀ¯Å°°ª
+	// ê·¸ë£¹ë‚´ì˜ ê° Dataë¥¼ êµ¬ë¶„í•˜ëŠ” ê³ ìœ í‚¤ê°’
 	private static int contentsPKValue = 0;
 
 	public History(String groupPK) {
-		this.groupPK = groupPK; // XXX[delf]: »ç½Ç ÇÊ¿äÇÑÁö Àß ¸ğ¸£°ÚÀ½
+		this.groupPK = groupPK; // XXX[delf]: ì‚¬ì‹¤ í•„ìš”í•œì§€ ì˜ ëª¨ë¥´ê² ìŒ
 		contentsMap = new HashMap<String, Contents>();
 	}
 
-	/** »õ·Î¿î µ¥ÀÌÅÍ°¡ ¾÷·ÎµåµÇ¸é È÷½ºÅä¸®¿¡ addÇÑ ÈÄ Contents¸¦ return */
+	/** ìƒˆë¡œìš´ ë°ì´í„°ê°€ ì—…ë¡œë“œë˜ë©´ íˆìŠ¤í† ë¦¬ì— addí•œ í›„ Contentsë¥¼ return */
 	public Contents addContents(Contents contents) {
 		contents.setContentsPKName(Integer.toString(++contentsPKValue));
 		contentsMap.put(contents.getContentsPKName(), contents);
@@ -29,7 +29,7 @@ public class History {
 		return contentsMap.get(contents.getContentsPKName());
 	}
 
-	/** Data¸¦ ±¸ºĞÇÏ´Â °íÀ¯Å°°ª°ú ÀÏÄ¡ÇÏ´Â Contents¸¦ return */
+	/** Dataë¥¼ êµ¬ë¶„í•˜ëŠ” ê³ ìœ í‚¤ê°’ê³¼ ì¼ì¹˜í•˜ëŠ” Contentsë¥¼ return */
 	public Contents getContentsByPK(String contentsPKName) {
 		return contentsMap.get(contentsPKName);
 	}

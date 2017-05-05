@@ -54,9 +54,9 @@ public class MessageParser {
 		return message;
 	}
 
-	/** Image¸¦ ResizingÇÑ ImageIconÀ¸·Î return */
+	/** Imageë¥¼ Resizingí•œ ImageIconìœ¼ë¡œ return */
 	private static Image getResizingImageIcon(Image imageData) {
-		// FIXME: ÀÌ¹ÌÁöÀÇ Å©±â¸¦ ÁÙÀÏ ¶§, ºñÀ²À» ¸ÂÃâ °Í
+		// FIXME: ì´ë¯¸ì§€ì˜ í¬ê¸°ë¥¼ ì¤„ì¼ ë•Œ, ë¹„ìœ¨ì„ ë§ì¶œ ê²ƒ
 		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
 		return imageData;
 	}
@@ -64,7 +64,7 @@ public class MessageParser {
 	private static byte[] getImgBytes(Image image) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			ImageIO.write(getBufferedImage(image), "JPEG", baos);
+			ImageIO.write(getBufferedImage(image), "PNG", baos);
 		} catch (IOException ex) {
 			// handle it here.... not implemented yet...
 		}
