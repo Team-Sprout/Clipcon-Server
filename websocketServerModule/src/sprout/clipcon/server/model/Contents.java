@@ -27,7 +27,7 @@ public class Contents {
 	private String uploadTime;
 
 	private String contentsValue = "";
-	// String Type: String��, (single) File Type: FileOriginName
+	//  String Type: String값, (single) File Type: FileOriginName
 
 	private int primaryKey = 0;
 	
@@ -36,7 +36,7 @@ public class Contents {
 	public static final int FILE_NAME = 1;
 
 	public Contents() {
-		System.out.println("\n����Ʈ ������ ����~~~");
+		System.out.println("\n디폴트 생성자 드루옴~~~");
 	}
 	
 	public Contents(String type, String userEmail, String time, long size) {
@@ -45,16 +45,16 @@ public class Contents {
 		this.uploadTime = time;
 		this.contentsSize = size;
 		
-		System.out.println("\n������ ����~~~");
+		System.out.println("\n생성자 드루옴~~~");
 
 		if (contentsType.equals(TYPE_MULTIPLE_FILE)) {
 			filePaths = Collections.synchronizedMap(new HashMap<String, String[]>());
-			System.out.println("TYPE_MULTIPLE_FILE�� ������ ����~~~");
+			System.out.println("TYPE_MULTIPLE_FILE인 생성자 드루옴~~~");
 		}
 	}
 
-	/** @param path �����
-	 * @param origineFileName ���ϸ� */
+	/** @param path 상대경로
+	 * @param origineFileName 파일명 */
 	public String addFilePath(String path, String origineFileName) {
 		String key = Integer.toString(++primaryKey);
 		String[] tmp = { path, origineFileName };
@@ -78,7 +78,7 @@ public class Contents {
 	public void printAllFileInfo() {
 		if (filePaths != null) {
 			Iterator<String> itr = filePaths.keySet().iterator();
-			System.out.println("------------------------------------Contents ���� ���� ���� ���");
+			System.out.println("------------------------------------Contents 안의 파일 내용 출력");
 
 			while (itr.hasNext()) {
 				String key = itr.next();

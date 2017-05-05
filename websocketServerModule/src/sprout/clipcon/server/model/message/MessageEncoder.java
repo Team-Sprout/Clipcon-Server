@@ -1,7 +1,7 @@
 package sprout.clipcon.server.model.message;
 
 /**
- * Å¬¶óÀÌ¾ğÆ®·Î º¸³¾ object(Message)¸¦ stringÀ¸·Î encoding. */
+ * í´ë¼ì´ì–¸íŠ¸ë¡œ ë³´ë‚¼ object(Message)ë¥¼ stringìœ¼ë¡œ encoding. */
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;

@@ -9,17 +9,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class TmpLog {
-	/** request Msg Ãâ·Â */
+	/** Print request Msg */
 	public static void requestMsgLog(HttpServletRequest request) {
 
-		/* server°¡ ¹ŞÀº request ½ÃÀÛÁÙ Á¤º¸ */
+		/* serverê°€ ë°›ì€ request ì‹œì‘ì¤„ ì •ë³´ */
 		System.out.println("==================STARTLINE==================");
 		System.out.println("Request Method: " + request.getMethod());
 		System.out.println("Request RequestURI: " + request.getRequestURI());
 		System.out.println("Request Protocol: " + request.getProtocol());
 
-		/* server°¡ ¹ŞÀº request Çì´õ Á¤º¸ */
-		/* server°¡ ¹ŞÀº ±âº»ÀûÀÎ request header msg Á¤º¸ */
+		/* serverê°€ ë°›ì€ request í—¤ë” ì •ë³´ */
+		/* serverê°€ ë°›ì€ ê¸°ë³¸ì ì¸ request header msg ì •ë³´ */
 		System.out.println("===================HEADER====================");
 		Enumeration headerNames = request.getHeaderNames();
 
@@ -47,7 +47,7 @@ public class TmpLog {
 		System.out.println();
 	}
 
-	/** Client·Î response Msg Àü´Ş */
+	/** Clientë¡œ response Msg ì „ë‹¬ */
 	public static void responseMsgLog(HttpServletResponse response) {
 		PrintWriter writer;
 		try {
@@ -58,12 +58,12 @@ public class TmpLog {
 
 			writer.println("Http Post Response: " + response.toString());
 
-			/* client°¡ ¹ŞÀº response ½ÃÀÛÁÙ Á¤º¸ */
+			/* clientê°€ ë°›ì€ response ì‹œì‘ì¤„ ì •ë³´ */
 			writer.println("==================STARTLINE==================");
 			writer.println("Response Status: " + response.getStatus());
 			writer.println("Response ContentType: " + response.getContentType());
 
-			/* client°¡ ¹ŞÀº response Çì´õ Á¤º¸ */
+			/* clientê°€ ë°›ì€ response í—¤ë” ì •ë³´ */
 			writer.println("==================HEADER=====================");
 			Collection<String> headerNames = response.getHeaderNames();
 

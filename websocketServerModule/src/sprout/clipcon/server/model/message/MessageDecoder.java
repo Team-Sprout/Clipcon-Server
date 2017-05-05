@@ -7,7 +7,7 @@ import javax.websocket.EndpointConfig;
 import org.json.JSONObject;
 
 /**
- * Å¬¶óÀÌ¾ğÆ®¿¡¼­ ¹ŞÀº stringÀ» object(Message)·Î decoding. */
+ * í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë°›ì€ stringì„ object(Message)ë¡œ decoding. */
 public class MessageDecoder implements Decoder.Text<Message> {
 	JSONObject json;
 
@@ -18,7 +18,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 	}
 
 	public Message decode(String incommingMessage) throws DecodeException {
-		System.out.println("=============== ¼­¹ö´Â ¹ŞÀº string È®ÀÎ ===============\n" + incommingMessage + "\n---------------------------------------------------");
+		System.out.println("=============== ì„œë²„ëŠ” ë°›ì€ string í™•ì¸ ===============\n" + incommingMessage + "\n---------------------------------------------------");
 		Message message = new Message().setJson(incommingMessage);
 		// message.setJson(incommingMessage);
 		

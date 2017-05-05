@@ -18,7 +18,7 @@ public class Message {
 	}
 
 	public Message setJson(JSONObject json) {
-		this.json = json; // XXX: 바꿀 필요 있을수도 있음
+		this.json = json; // XXX: 
 		type = json.getString(TYPE);
 		return this;
 	}

@@ -20,9 +20,9 @@ import sprout.clipcon.server.model.message.MessageParser;
 @Getter
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { MessageEncoder.class }, decoders = { MessageDecoder.class })
 public class UserController {
-	private Server server;	// ¼­¹ö
-	private Group group;	// Âü¿© ÁßÀÎ ±×·ì
-	// private User user; // user Á¤º¸
+	private Server server;	// ì„œë²„
+	private Group group;	// ì°¸ì—¬ ì¤‘ì¸ ê·¸ë£¹
+	// private User user; // user ì •ë³´
 	private Session session;
 	private String userName;
 
@@ -33,72 +33,72 @@ public class UserController {
 
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
-		String type = incomingMessage.getType(); // ¹ŞÀº ¸Ş½ÃÁöÀÇ Å¸ÀÔ ÃßÃâ
+		String type = incomingMessage.getType(); // ë°›ì€ ë©”ì‹œì§€ì˜ íƒ€ì… ì¶”ì¶œ
 
 		if (session != userSession) { // for test
-			System.out.println("ÀÌ·±»óÈ²ÀÌ ¹ß»ıÇÒ ¼ö ÀÖÀ»±î");
+			System.out.println("ì´ëŸ°ìƒí™©ì´ ë°œìƒí•  ìˆ˜ ìˆì„ê¹Œ");
 			return;
 		}
-		this.session = userSession; // ¼¼¼Ç assign
+		this.session = userSession; // ì„¸ì…˜ assign
 
-		System.out.println("[Server] message received success. type: " + type); // ¸Ş½ÃÁö Å¸ÀÔ È®ÀÎ
+		System.out.println("[Server] message received success. type: " + type); // ë©”ì‹œì§€ íƒ€ì… í™•ì¸
 
-		Message responseMsg = null; // Å¬¶óÀÌ¾ğÆ®¿¡°Ô º¸³¾ ¸Ş½ÃÁö ÃÊ±âÈ­
+		Message responseMsg = null; // í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë³´ë‚¼ ë©”ì‹œì§€ ì´ˆê¸°í™”
 
 		switch (type) {
 
-			case Message.REQUEST_CREATE_GROUP: /* ¿äÃ» Å¸ÀÔ: ±×·ì »ı¼º */
+			case Message.REQUEST_CREATE_GROUP: /* ìš”ì²­ íƒ€ì…: ê·¸ë£¹ ìƒì„± */
 
-			server = Server.getInstance();		// "¼­¹ö"ÀÇ instance Ãß°¡
-			group = server.createGroup();			// ¼­¹ö¿¡ ±×·ìÀ» Ãß°¡ÇÏ°í "ÀÌ °´Ã¼°¡ ¼Ò¼ÓµÈ ±×·ì"ÀÇ instance Ãß°¡
-			userName = group.addUser(session.getId(), this); 								// ±×·ì¿¡ ÀÚ½ÅÀ» Ãß°¡, »ç¿ëÀÚÀÇ ÀÌ¸§À» ¹Ş¾Æ¿È / XXX ¼öÁ¤ ÇÊ¿ä
+			server = Server.getInstance(); // "ì„œë²„"ì˜ instance ì¶”ê°€
+			group = server.createGroup(); // ì„œë²„ì— ê·¸ë£¹ì„ ì¶”ê°€í•˜ê³  "ì´ ê°ì²´ê°€ ì†Œì†ëœ ê·¸ë£¹"ì˜ instance ì¶”ê°€
+			userName = group.addUser(session.getId(), this); // ê·¸ë£¹ì— ìì‹ ì„ ì¶”ê°€, ì‚¬ìš©ìì˜ ì´ë¦„ì„ ë°›ì•„ì˜´ / XXX ìˆ˜ì • í•„ìš”
 
-			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); 	// ÀÀ´ä ¸Ş½ÃÁö »ı¼º, ÀÀ´ä Å¸ÀÔÀº "±×·ì »ı¼º ¿äÃ»¿¡ ´ëÇÑ ÀÀ´ä"
-			responseMsg.add(Message.RESULT, Message.CONFIRM);							// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: ÀÀ´ä °á°ú
-			responseMsg.add(Message.NAME, userName);											// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: »ç¿ëÀÚ ÀÌ¸§
-			MessageParser.addMessageToGroup(responseMsg, group);							// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: ±×·ì Á¤º¸
+			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // ì‘ë‹µ ë©”ì‹œì§€ ìƒì„±, ì‘ë‹µ íƒ€ì…ì€ "ê·¸ë£¹ ìƒì„± ìš”ì²­ì— ëŒ€í•œ ì‘ë‹µ"
+			responseMsg.add(Message.RESULT, Message.CONFIRM); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì‘ë‹µ ê²°ê³¼
+			responseMsg.add(Message.NAME, userName); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì‚¬ìš©ì ì´ë¦„
+			MessageParser.addMessageToGroup(responseMsg, group); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ê·¸ë£¹ ì •ë³´
 
 				break;
 
-			case Message.REQUEST_JOIN_GROUP: /* ¿äÃ» Å¸ÀÔ: ±×·ì Âü°¡ */
+			case Message.REQUEST_JOIN_GROUP:  /* ìš”ì²­ íƒ€ì…: ê·¸ë£¹ ì°¸ê°€ */
 
 			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	// ¼­¹ö¿¡¼­ "¿äÃ»ÇÑ ±×·ìÅ°¿¡ ÇØ´çÇÏ´Â °´Ã¼"¸¦ °¡Á®¿È
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	// ì„œë²„ì—ì„œ "ìš”ì²­í•œ ê·¸ë£¹í‚¤ì— í•´ë‹¹í•˜ëŠ” ê°ì²´"ë¥¼ ê°€ì ¸ì˜´
 
-			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP);				// ÀÀ´ä ¸Ş¼¼Áö »ı¼º, ÀÀ´ä Å¸ÀÔÀÎ "±×·ì Âü°¡ ¿äÃ»¿¡ ´ëÇÑ ÀÀ´ä"
-			if (group != null) {													// ÇØ´ç ±×·ìÅ°¿¡ ¸ÅÇÎµÇ´Â ±×·ìÀÌ Á¸Àç ½Ã,
-				userName = group.addUser(session.getId(), this);		// ±×·ì¿¡ ÀÚ½ÅÀ» Ãß°¡, »ç¿ëÀÚÀÇ ÀÌ¸§À» ¹Ş¾Æ¿È / XXX ¼öÁ¤ ÇÊ¿ä
-				responseMsg.add(Message.RESULT, Message.CONFIRM);	// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: ÀÀ´ä °á°ú
-				responseMsg.add(Message.NAME, userName);					// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: »ç¿ëÀÚ ÀÌ¸§
-				MessageParser.addMessageToGroup(responseMsg, group);	// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: ±×·ì Á¤º¸
+			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // ì‘ë‹µ ë©”ì„¸ì§€ ìƒì„±, ì‘ë‹µ íƒ€ì…ì¸ "ê·¸ë£¹ ì°¸ê°€ ìš”ì²­ì— ëŒ€í•œ ì‘ë‹µ"
+			if (group != null) { // í•´ë‹¹ ê·¸ë£¹í‚¤ì— ë§¤í•‘ë˜ëŠ” ê·¸ë£¹ì´ ì¡´ì¬ ì‹œ,
+				userName = group.addUser(session.getId(), this); // ê·¸ë£¹ì— ìì‹ ì„ ì¶”ê°€, ì‚¬ìš©ìì˜ ì´ë¦„ì„ ë°›ì•„ì˜´ / XXX ìˆ˜ì • í•„ìš”
+				responseMsg.add(Message.RESULT, Message.CONFIRM); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì‘ë‹µ ê²°ê³¼
+				responseMsg.add(Message.NAME, userName); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì‚¬ìš©ì ì´ë¦„
+				MessageParser.addMessageToGroup(responseMsg, group); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ê·¸ë£¹ ì •ë³´
 
-				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT);	// ¾Ë¸² ¸Ş½ÃÁö »ı¼º, ¾Ë¸² Å¸ÀÔÀº "Âü°¡ÀÚ¿¡ ´ëÇÑ Á¤º¸"
-				noti.add(Message.PARTICIPANT_NAME, userName);						// ¾Ë¸² ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: Âü°¡ÀÚ Á¤º¸
+				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT); // ì•Œë¦¼ ë©”ì‹œì§€ ìƒì„±, ì•Œë¦¼ íƒ€ì…ì€ "ì°¸ê°€ìì— ëŒ€í•œ ì •ë³´"
+				noti.add(Message.PARTICIPANT_NAME, userName); // ì•Œë¦¼ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì°¸ê°€ì ì •ë³´
 				group.sendWithout(userName, noti);
 
-			} else {																		// ÇØ´ç ±×·ìÅ°¿¡ ¸ÅÇÎµÇ´Â ±×·ìÀÌ Á¸ÀçÇÏÁö ¾ÊÀ» ½Ã,
-				responseMsg.add(Message.RESULT, Message.REJECT);		// ÀÀ´ä ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: ÀÀ´ä °á°ú
+			} else {																		// í•´ë‹¹ ê·¸ë£¹í‚¤ì— ë§¤í•‘ë˜ëŠ” ê·¸ë£¹ì´ ì¡´ì¬í•˜ì§€ ì•Šì„ ì‹œ,
+				responseMsg.add(Message.RESULT, Message.REJECT); // ì‘ë‹µ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì‘ë‹µ ê²°ê³¼
 			}
 				break;
 
 			default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
-			System.out.println("¿¹¿Ü»çÇ×");
+			System.out.println("ì˜ˆì™¸ì‚¬í•­");
 				break;
 		}
-		System.out.println("============ Å¬¶óÀÌ¾ğÆ®¿¡°Ô º¸³½ ¸Ş½ÃÁö ============\n" + responseMsg + "\n---------------------------------------------------");
-		sendMessage(session, responseMsg);					 // Àü¼Û
+		System.out.println("============ í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ë³´ë‚¸ ë©”ì‹œì§€ ============\n" + responseMsg + "\n---------------------------------------------------");
+		sendMessage(session, responseMsg);					 // ì „ì†¡
 	}
 
 	@OnClose
 	public void handleClose(Session userSession) {
-		System.out.println("³ª°¨");
+		System.out.println("ë‚˜ê°");
 		if (userSession == null) {
-			System.out.println("¼¼¼ÇÀÌ null");
+			System.out.println("ì„¸ì…˜ì´ null");
 		}
 
-		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT);	// ¾Ë¸² ¸Ş½ÃÁö »ı¼º, ¾Ë¸² Å¸ÀÔÀº "Âü°¡ÀÚ¿¡ ´ëÇÑ Á¤º¸"
-		noti.add(Message.PARTICIPANT_NAME, userName);							// ¾Ë¸² ¸Ş½ÃÁö¿¡ ³»¿ë Ãß°¡: Âü°¡ÀÚ Á¤º¸
+		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // ì•Œë¦¼ ë©”ì‹œì§€ ìƒì„±, ì•Œë¦¼ íƒ€ì…ì€ "ì°¸ê°€ìì— ëŒ€í•œ ì •ë³´"
+		noti.add(Message.PARTICIPANT_NAME, userName); // ì•Œë¦¼ ë©”ì‹œì§€ì— ë‚´ìš© ì¶”ê°€: ì°¸ê°€ì ì •ë³´
 		try {
 			group.sendWithout(userName, noti);
 		} catch (IOException e) {
@@ -111,7 +111,7 @@ public class UserController {
 
 	@OnError
 	public void handleError(Throwable t) {
-		System.out.println("¿À·ù ¹ß»ı");
+		System.out.println("ì˜¤ë¥˜ ë°œìƒ");
 		t.printStackTrace();
 	}
 
@@ -123,7 +123,7 @@ public class UserController {
 	private String createTmpGroup() {
 		Group group = server.createGroup();
 		if (group == null) {
-			System.out.println("±×·ìÀÌ ¸¸µé¾îÁöÁö ¾ÊÀ½");
+			System.out.println("ê·¸ë£¹ì´ ë§Œë“¤ì–´ì§€ì§€ ì•ŠìŒ");
 		}
 		return group.getPrimaryKey();
 	}
@@ -134,7 +134,7 @@ public class UserController {
 		try {
 			new UserController().handleMessage(tmpMessage, null);
 		} catch (Exception e) {
-			System.out.println("¿¹¿Ü ¹«½Ã");
+			System.out.println("ì˜ˆì™¸ ë¬´ì‹œ");
 			e.printStackTrace();
 		}
 	}
