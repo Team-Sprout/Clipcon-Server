@@ -19,6 +19,7 @@ public class Contents {
 	public final static String TYPE_IMAGE = "IMAGE";
 	public final static String TYPE_FILE = "FILE";
 	public final static String TYPE_MULTIPLE_FILE = "MULTIPLE_FILE";
+	public final static String TYPE_DIRECTORY = "DIRECTORY";
 
 	private String contentsType;
 	private long contentsSize;
@@ -39,9 +40,9 @@ public class Contents {
 		System.out.println("\n디폴트 생성자 드루옴~~~");
 	}
 	
-	public Contents(String type, String userEmail, String time, long size) {
+	public Contents(String type, String userName, String time, long size) {
 		this.contentsType = type;
-		this.uploadUserName = userEmail;
+		this.uploadUserName = userName;
 		this.uploadTime = time;
 		this.contentsSize = size;
 		
@@ -83,7 +84,7 @@ public class Contents {
 			while (itr.hasNext()) {
 				String key = itr.next();
 				String[] tmp = filePaths.get(key);
-				System.out.println("key: " + key + ", value: " + tmp[0] + "||" + tmp[1]);
+				System.out.println("key: " + key + ", tmp[0]: " + tmp[0] + ", tmp[1]: " + tmp[1]);
 			}
 		}
 	}

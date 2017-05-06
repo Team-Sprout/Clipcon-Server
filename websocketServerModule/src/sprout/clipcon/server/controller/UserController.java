@@ -20,8 +20,8 @@ import sprout.clipcon.server.model.message.MessageParser;
 @Getter
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { MessageEncoder.class }, decoders = { MessageDecoder.class })
 public class UserController {
-	private Server server;	// 서버
-	private Group group;	// 참여 중인 그룹
+	private Server server; // 서버
+	private Group group; // 참여 중인 그룹
 	// private User user; // user 정보
 	private Session session;
 	private String userName;
@@ -47,7 +47,7 @@ public class UserController {
 
 		switch (type) {
 
-			case Message.REQUEST_CREATE_GROUP: /* 요청 타입: 그룹 생성 */
+		case Message.REQUEST_CREATE_GROUP: /* 요청 타입: 그룹 생성 */
 
 			server = Server.getInstance(); // "서버"의 instance 추가
 			group = server.createGroup(); // 서버에 그룹을 추가하고 "이 객체가 소속된 그룹"의 instance 추가
@@ -58,12 +58,12 @@ public class UserController {
 			responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
 			MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
 
-				break;
+			break;
 
-			case Message.REQUEST_JOIN_GROUP:  /* 요청 타입: 그룹 참가 */
+		case Message.REQUEST_JOIN_GROUP: /* 요청 타입: 그룹 참가 */
 
 			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK));	// 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
 
 			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답"
 			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
@@ -76,18 +76,19 @@ public class UserController {
 				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
 				group.sendWithout(userName, noti);
 
-			} else {																		// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
 			}
-				break;
+			break;
 
-			default:
+		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
-				break;
+			break;
 		}
-		System.out.println("============ 클라이언트에게 보낸 메시지 ============\n" + responseMsg + "\n---------------------------------------------------");
-		sendMessage(session, responseMsg);					 // 전송
+		System.out.println("============ 클라이언트에게 보낸 메시지 ============\n" + responseMsg
+				+ "\n---------------------------------------------------");
+		sendMessage(session, responseMsg); // 전송
 	}
 
 	@OnClose

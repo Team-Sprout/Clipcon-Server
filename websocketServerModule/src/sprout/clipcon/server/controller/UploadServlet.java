@@ -171,7 +171,7 @@ public class UploadServlet extends HttpServlet {
 				directoryName = directoryName.substring(0, directoryName.length() - 1);
 
 				System.out.println("directoryName: " + directoryName);
-				multipartUploadContents.addFilePath(directoryName, null);
+				multipartUploadContents.addFilePath(directoryName, Contents.TYPE_DIRECTORY);
 			break;
 
 			default:
