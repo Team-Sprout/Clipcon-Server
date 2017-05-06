@@ -24,6 +24,7 @@ public class History {
 	/** 새로운 데이터가 업로드되면 히스토리에 add한 후 Contents를 return */
 	public Contents addContents(Contents contents) {
 		contents.setContentsPKName(Integer.toString(++contentsPKValue));
+		System.out.println("History addContents ContentsPkName: " + contents.getContentsPKName());
 		contentsMap.put(contents.getContentsPKName(), contents);
 
 		return contentsMap.get(contents.getContentsPKName());

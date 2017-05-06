@@ -15,8 +15,8 @@ public class Server {
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
 	private Server() {
-		Group testGroup = new Group("godoy");
-		groups.put("godoy", testGroup);
+		//Group testGroup = new Group("godoy");
+		//groups.put("godoy", testGroup);
 
 		new Thread(new Runnable() {
 			@Override
@@ -51,7 +51,9 @@ public class Server {
 	 * 그룹 생성 후 서버의 그룹 목록에 추가 
 	 * @return 생성된 그룹 객체 */
 	public Group createGroup() {
-		String groupKey = generatePrimaryKey(5);
+		// [희정] debug mode for download test
+		//String groupKey = generatePrimaryKey(5);
+		String groupKey = "abcABC";
 		System.out.println("할당된 그룹 키는 " + groupKey);
 		Group newGroup = new Group(groupKey);
 		groups.put(groupKey, newGroup);
