@@ -34,7 +34,7 @@ public class Group {
 		this.history = new History(primaryKey);
 		
 		//[희정] debug mode for download test
-		System.out.println("Group 생성자 불림");
+		System.out.println("Group Constructor");
 		setDefaultHistory(this);
 	}
 
@@ -71,11 +71,11 @@ public class Group {
 		}
 		return list;
 	}
-
-	public Contents addContents(Contents contents) {
-		return history.addContents(contents);
+	
+	public void addContents(Contents contents) {
+		history.addContents(contents);
 	}
-
+	
 	public Contents getContents(String key) {
 		return history.getContentsByPK(key);
 	}
@@ -118,13 +118,9 @@ public class Group {
 
 		Contents content3 = new Contents(Contents.TYPE_FILE, "test3", "2017-05-03 PM 33:33:33", 5424225);
 		content3.setContentsValue("IU-Palette.mp3"); //file name
-
-		Contents content4 = new Contents(Contents.TYPE_MULTIPLE_FILE, "test4", "2017-05-04 PM 44:44:44", 79895123);
-		content4.addFilePath("aaa", Contents.TYPE_DIRECTORY);
-		content4.addFilePath("aaa" + File.separator + "bbbb", Contents.TYPE_DIRECTORY);
-		content4.addFilePath("aaa" + File.separator + "bbbb", "2.zip");
-		content4.addFilePath("aaa" + File.separator + "bbbb" + File.separator + "cccc", Contents.TYPE_DIRECTORY);
-		content4.addFilePath("aaa", "hello.hwp");
+		
+		Contents content4 = new Contents(Contents.TYPE_MULTIPLE_FILE, "test3", "2017-05-04 PM 44:44:44", 5424225);
+		content4.setContentsValue("IU-Palette.mp3"); //file name
 
 		// test) abcABC group의 History에 setting
 		abcABCGroup.addContents(content1);
