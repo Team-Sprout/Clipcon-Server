@@ -32,7 +32,7 @@ import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
 
 /* maxFileSize: 최대 파일 크기(100MB)
- * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
+- * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
  * maxRequestSize:  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
@@ -44,7 +44,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("UploadServlet 생성");
 	}
 
-	// 업로드 파일을 저장할 위치
+	// �뾽濡쒕뱶 �뙆�씪�쓣 ���옣�븷 �쐞移�
 	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
 	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // TEST PATH 1
 
@@ -116,6 +116,7 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+
 			break;
 			
 			case "multipartFileData":
@@ -130,11 +131,11 @@ public class UploadServlet extends HttpServlet {
 			break;
 
 			default:
-				System.out.println("어떤 형식에도 속하지 않음.");
+				System.out.println("�뼱�뼡 �삎�떇�뿉�룄 �냽�븯吏� �븡�쓬.");
 			}
 		}
 
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // �븣由� 硫붿떆吏� �깮�꽦, �븣由� ���엯�� "�뜲�씠�꽣 �뾽濡쒕뱶"
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
 		try {
@@ -144,16 +145,16 @@ public class UploadServlet extends HttpServlet {
 		}
 		System.out.println();
 
-		System.out.println("서블릿 끝");
+		System.out.println("�꽌釉붾┸ �걹");
 		Date ed = new Date();
 		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
-		System.out.println("소요시간 = " + t + "초");
-		System.out.print("속도 = " + (float) len / t + " kb/s (");
+		System.out.println("�냼�슂�떆媛� = " + t + "珥�");
+		System.out.print("�냽�룄 = " + (float) len / t + " kb/s (");
 		System.out.println((float) len / t / (1024 * 1024) + " mb/s)");
 		// responseMsgLog(response);
 	}
 
-	/** String Data를 수신하는 Stream */
+	/** String Data瑜� �닔�떊�븯�뒗 Stream */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 		StringBuilder stringBuilder = new StringBuilder();
@@ -175,10 +176,10 @@ public class UploadServlet extends HttpServlet {
 		return stringBuilder.toString();
 	}
 
-	/** Image Data를 수신하는 Stream */
+	/** Image Data瑜� �닔�떊�븯�뒗 Stream */
 	public Image getImageDataStream(InputStream stream, String groupPK, String imagefileName) throws IOException {
 		byte[] imageInByte;
-		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+		String saveFilePath = RECEIVE_LOCATION + groupPK; // �궗�슜�옄媛� �냽�븳 洹몃９�쓽 �뤃�뜑�뿉 ���옣
 
 		// 업로드한 파일을 저장할 그룹 폴더 생성
 		createDirectory(saveFilePath);
@@ -204,10 +205,10 @@ public class UploadServlet extends HttpServlet {
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageInByte);
 		BufferedImage bImageFromConvert = ImageIO.read(byteArrayInputStream);
 
-		// file 형태로 저장
+		// file �삎�깭濡� ���옣
 		ImageIO.write(bImageFromConvert, "png", new File(saveFilePath, imagefileName));
 
-		// image 객체로 변환
+		// image 媛앹껜濡� 蹂��솚
 		Image ImageData = (Image) bImageFromConvert;
 		return ImageData;
 	}
@@ -241,7 +242,7 @@ public class UploadServlet extends HttpServlet {
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
 			fileOutputStream.flush();
-			System.out.println("루프 횟수 = " + testCnt);
+			System.out.println("猷⑦봽 �슏�닔 = " + testCnt);
 			flag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -254,10 +255,10 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 		Date end = new Date();
-		System.out.println("소요시간: " + (end.getTime() - start.getTime()));
+		System.out.println("�냼�슂�떆媛�: " + (end.getTime() - start.getTime()));
 	}
 
-	/** Request Header "content-disposition"에서 filename 추출 */
+	/** Request Header "content-disposition"�뿉�꽌 filename 異붿텧 */
 	private String getFilenameInHeader(String requestHeader) {
 		int beginIndex = requestHeader.indexOf("filename") + 10;
 		int endIndex = requestHeader.length() - 1;
@@ -268,9 +269,9 @@ public class UploadServlet extends HttpServlet {
 		return fileName;
 	}
 
-	// XXX: 모델 구현 시, 확인하기
+	// XXX: 紐⑤뜽 援ы쁽 �떆, �솗�씤�븯湲�
 	/**
-	 * Folder 생성 메서드
+	 * Folder �깮�꽦 硫붿꽌�뱶
 	 * 
 	 * @param directoryName
 	 *            이 이름으로 Directory 생성
@@ -279,7 +280,7 @@ public class UploadServlet extends HttpServlet {
 		File receiveFolder = new File(directoryName);
 		System.out.println("directoryName: " + directoryName);
 
-		// 저장할 그룹 폴더가 존재하지 않으면
+		// ���옣�븷 洹몃９ �뤃�뜑媛� 議댁옱�븯吏� �븡�쑝硫�
 		if (!receiveFolder.exists()) {
 			receiveFolder.mkdir(); // 폴더 생성
 			System.out.println("------------------------------------" + directoryName + " 폴더 생성");

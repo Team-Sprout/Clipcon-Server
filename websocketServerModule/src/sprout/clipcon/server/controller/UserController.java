@@ -29,6 +29,7 @@ public class UserController {
 	@OnOpen
 	public void handleOpen(Session userSession) {
 		this.session = userSession;
+		System.out.println("누군가 접속했다!");
 	}
 
 	@OnMessage
