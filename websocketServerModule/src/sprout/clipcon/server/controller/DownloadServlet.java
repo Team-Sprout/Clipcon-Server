@@ -80,7 +80,6 @@ public class DownloadServlet extends HttpServlet {
 			response.setContentType("text/plain; charset=UTF-8");
 
 			sendStringData(stringData, response.getOutputStream());
-
 			break;
 			
 		case Contents.TYPE_IMAGE:
@@ -89,53 +88,50 @@ public class DownloadServlet extends HttpServlet {
 			response.setContentType("image/png");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
-
 			// dir에 있는 image file을 가져와 전송. (ByteArrayStream)
 			sendFileData(imageFileName, response.getOutputStream());
-
 			break;
 			
 		case Contents.TYPE_FILE:
 			String fileName = contents.getContentsPKName();
-
-			// response.setContentType("multipart/mixed");
-			response.setContentType("application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
-			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
-
+			
+			setHeaderForSendingFile(fileName, response);
 			// dir에 있는 file을 가져와 전송. (FileStream)
 			sendFileData(fileName, response.getOutputStream());
-
 			break;
 			
 		case Contents.TYPE_MULTIPLE_FILE:
-			String multipleFileInfo = multipleDataInfo(contents.getContentsPKName(), group);
+			String multipleFileName = contents.getContentsPKName();
 			
-			response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
-			response.setContentType("text/plain; charset=UTF-8");
-			
-			// multiple file data에 대한 info를 전송
-			sendStringData(multipleFileInfo, response.getOutputStream());
-			
+			setHeaderForSendingFile(multipleFileName, response);
+
+			// dir에 있는 file을 가져와 전송. (FileStream)
+			sendFileData(multipleFileName, response.getOutputStream());
 			break;
 			
 		default:
 			System.out.println("어떤 형식에도 속하지 않음.");
 		}
-
 		// responseMsgLog(response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		// doGet(request, response);
 	}
+	
+	/** Setting Header Info For Sending File and Multiple File */
+	public void setHeaderForSendingFile(String fileName, HttpServletResponse response){
+		// response.setContentType("multipart/mixed");
+		response.setContentType("application/octet-stream");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
+		response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+	}
 
-	/** String Data 전송 */
+	/** Send String Data */
 	public void sendStringData(String stringData, OutputStream outputStream) {
 		try {
 
@@ -151,7 +147,7 @@ public class DownloadServlet extends HttpServlet {
 		}
 	}
 
-	/** Captured Image Data, File Data를 전송 */
+	/** Send Captured Image Data, File Data and Multiple Data */
 	public void sendFileData(String fileName, OutputStream outputStream) {
 		// 보낼 file data를 가져오기
 		File sendFileContents = new File(ROOT_LOCATION + groupPK + File.separator + fileName);
@@ -170,22 +166,5 @@ public class DownloadServlet extends HttpServlet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/** Contents안에 있는 Multiple File Data에 대한 정보를 전송(Json 형식으로) */
-	public String multipleDataInfo(String multipleFilePKName, Group group) {
-		Map<String, String[]> multipleFilePaths = group.getContents(multipleFilePKName).getFilePaths();
-		JSONObject jsonOfMultipleDataInfo = new JSONObject();
-		
-		Iterator<String> keys = multipleFilePaths.keySet().iterator();
-		
-		while (keys.hasNext()) {
-			String filePK = keys.next();
-			
-			jsonOfMultipleDataInfo.put(filePK, multipleFilePaths.get(filePK));
-		}
-		System.out.println("<<jsonOfMultipleDataInfo>>\n" + jsonOfMultipleDataInfo);
-		
-		return jsonOfMultipleDataInfo.toString();
 	}
 }
