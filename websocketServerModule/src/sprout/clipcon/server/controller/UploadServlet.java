@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
@@ -69,7 +70,7 @@ public class UploadServlet extends HttpServlet {
 
 		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
-		uploadTime = request.getParameter("uploadTime");
+		uploadTime = uploadTime(); // Time that server get request msg
 		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
@@ -276,13 +277,42 @@ public class UploadServlet extends HttpServlet {
 	 */
 	private void createDirectory(String directoryName) {
 		File receiveFolder = new File(directoryName);
-		System.out.println(", directoryName: " + directoryName);
+		System.out.println("directoryName: " + directoryName);
 
 		// 저장할 그룹 폴더가 존재하지 않으면
 		if (!receiveFolder.exists()) {
 			receiveFolder.mkdir(); // 폴더 생성
 			System.out.println("------------------------------------" + directoryName + " 폴더 생성");
 		}
+	}
+	
+	/** @return Current Time YYYY-MM-DD HH:MM:SS  */
+	public String uploadTime() {
+		Calendar cal = Calendar.getInstance();
+		String year = Integer.toString(cal.get(Calendar.YEAR));
+		String month = Integer.toString(cal.get(Calendar.MONTH) + 1);
+
+		String date = Integer.toString(cal.get(Calendar.DATE));
+		String hour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
+		if (Integer.parseInt(hour) < 10) {
+			hour = "0" + hour;
+		}
+		if (Integer.parseInt(hour) > 12) {
+			hour = "PM " + Integer.toString(Integer.parseInt(hour) - 12);
+		} else {
+			hour = "AM " + hour;
+		}
+
+		String minute = Integer.toString(cal.get(Calendar.MINUTE));
+		if (Integer.parseInt(minute) < 10) {
+			minute = "0" + minute;
+		}
+		String sec = Integer.toString(cal.get(Calendar.SECOND));
+		if (Integer.parseInt(sec) < 10) {
+			sec = "0" + sec;
+		}
+
+		return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + sec;
 	}
 
 	// O

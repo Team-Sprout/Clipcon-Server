@@ -119,8 +119,8 @@ public class Group {
 		Contents content3 = new Contents(Contents.TYPE_FILE, "test3", "2017-05-03 PM 33:33:33", 5424225);
 		content3.setContentsValue("IU-Palette.mp3"); //file name
 		
-		Contents content4 = new Contents(Contents.TYPE_MULTIPLE_FILE, "test3", "2017-05-04 PM 44:44:44", 5424225);
-		content4.setContentsValue("IU-Palette.mp3"); //file name
+		Contents content4 = new Contents(Contents.TYPE_MULTIPLE_FILE, "test3", "2017-05-04 PM 44:44:44", 85338989);
+		content4.setContentsValue("abcABC.zip"); //file name
 
 		// test) abcABC group의 History에 setting
 		abcABCGroup.addContents(content1);
