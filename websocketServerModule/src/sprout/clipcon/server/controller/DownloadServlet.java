@@ -38,11 +38,11 @@ public class DownloadServlet extends HttpServlet {
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
-
+	
 	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
-
+	
 	private Server server = Server.getInstance();
 
 	/**

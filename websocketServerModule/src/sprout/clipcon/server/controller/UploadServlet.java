@@ -42,8 +42,8 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	// 업로드 파일을 저장할 위치
-	//private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
+	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
+//	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
 
 	private String userName = null;
 	private String groupPK = null;
@@ -131,8 +131,6 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("어떤 형식에도 속하지 않음.");
 			}
 		}
-
-		
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 		
 

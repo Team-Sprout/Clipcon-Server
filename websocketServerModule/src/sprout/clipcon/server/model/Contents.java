@@ -38,7 +38,5 @@ public class Contents {
 		this.uploadUserName = userName;
 		this.uploadTime = time;
 		this.contentsSize = size;
-		
-		// System.out.println("Contents Constructor");
 	}
 }
