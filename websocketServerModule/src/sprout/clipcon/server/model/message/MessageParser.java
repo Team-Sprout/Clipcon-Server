@@ -1,5 +1,6 @@
 package sprout.clipcon.server.model.message;
 
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+// import org.apache.tomcat.util.codec.binary.Base64;
 import org.json.JSONArray;
 
 import sprout.clipcon.server.model.Contents;
@@ -30,7 +32,7 @@ public class MessageParser {
 		}
 		message.add(Message.LIST, array);
 		return message;
-		// TODO:
+	
 	}
 
 	public static Message appendMessageByGroup(Message message, Group group) {
@@ -50,55 +52,51 @@ public class MessageParser {
 
 	public static Message addImageToMessage(Message message, Image image) {
 		image = getResizingImageIcon(image);
-		message.add("imageString", getBase64StringByImage(image));
+		String test = getBase64StringByImage(image);
+		message.add("imageString", test);
+		System.out.println("image string: " + test);
 		return message;
 	}
-
+	
 	/** Image를 Resizing한 ImageIcon으로 return */
 	private static Image getResizingImageIcon(Image imageData) {
 		// FIXME: 이미지의 크기를 줄일 때, 비율을 맞출 것
-		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-		return imageData;
+//		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
+//		return imageData;
+		return imageData; // 임시로 원본 전송
 	}
-
+	
+	private static String getBase64StringByImage(Image image) {
+		byte[] imageBytes = getImgBytes(image);
+		return Base64.getEncoder().encodeToString(imageBytes);
+	}
+	
 	private static byte[] getImgBytes(Image image) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			ImageIO.write(getBufferedImage(image), "PNG", baos);
+			ImageIO.write(toBufferedImage(image), "jpg", baos);
 		} catch (IOException ex) {
 			// handle it here.... not implemented yet...
 		}
 		return baos.toByteArray();
 	}
+	
+	private static BufferedImage toBufferedImage(Image img) {
+	    if (img instanceof BufferedImage) {
+	        return (BufferedImage) img;
+	    }
 
-	private static BufferedImage getBufferedImage(Image image) {
-		int width = image.getWidth(null);
-		int height = image.getHeight(null);
-		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		// Graphics2D g2d = bi.createGraphics();
-		// g2d.drawImage(image, 0, 0, null);
-		return bi;
-	}
+	    // Create a buffered image with transparency
+	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-	private static String getBase64StringByImage(Image image) {
-		byte[] imageBytes = getImgBytes(image);
-		return Base64.getEncoder().encodeToString(imageBytes);
-	}
-	/** @author delf
-	 * client code */
-	public static Image getImagebyMessage(Message message) {
-		String imageString = message.get("imageString");
-		byte[] imageBytes = Base64.getDecoder().decode(imageString);
-		BufferedImage imag;
-		try {
-			imag = ImageIO.read(new ByteArrayInputStream(imageBytes));
-			return imag;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+	    // Draw the image on to the buffered image
+	    Graphics2D bGr = bimage.createGraphics();
+	    bGr.drawImage(img, 0, 0, null);
+	    bGr.dispose();
 
+	    // Return the buffered image
+	    return bimage;
+	}
 
 	public static void main(String[] args) {
 
