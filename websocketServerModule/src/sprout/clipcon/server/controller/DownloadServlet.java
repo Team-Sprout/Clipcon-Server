@@ -104,7 +104,6 @@ public class DownloadServlet extends HttpServlet {
 			String multipleFileName = contents.getContentsPKName();
 			
 			setHeaderForSendingFile(multipleFileName, response);
-
 			// dir에 있는 file을 가져와 전송. (FileStream)
 			sendFileData(multipleFileName, response.getOutputStream());
 			break;
