@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,10 +21,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import javax.swing.ImageIcon;
 import javax.websocket.EncodeException;
 
-import lombok.NonNull;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
@@ -45,8 +42,8 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	// 업로드 파일을 저장할 위치
-	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // TEST PATH 1
+	//private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
+	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
 
 	private String userName = null;
 	private String groupPK = null;
@@ -75,7 +72,7 @@ public class UploadServlet extends HttpServlet {
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
-
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
 
@@ -103,7 +100,8 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 
 				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-
+				MessageParser.addImageToMessage(uploadNoti, imageData);
+				
 				System.out.println("imageData: " + imageData.toString());
 			break;
 
@@ -111,18 +109,18 @@ public class UploadServlet extends HttpServlet {
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
 
 				uploadContents = new Contents(Contents.TYPE_FILE, userName, uploadTime, part.getSize());
-				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); //save fileName
+				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
 				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 			break;
-			
+
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
-				
+
 				uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
-				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); //save fileName
+				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
 				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
@@ -134,8 +132,9 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
+		
 
 		try {
 			group.sendAll(uploadNoti);
@@ -285,7 +284,7 @@ public class UploadServlet extends HttpServlet {
 			System.out.println("------------------------------------" + directoryName + " 폴더 생성");
 		}
 	}
-	
+
 	/** @return Current Time YYYY-MM-DD HH:MM:SS  */
 	public String uploadTime() {
 		Calendar cal = Calendar.getInstance();
@@ -315,13 +314,12 @@ public class UploadServlet extends HttpServlet {
 		return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + sec;
 	}
 
-	// O
-	// private String getStringFromBitmap(Image bitmapPicture) {
-	// String encodedImage;
-	// ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-	// bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
-	// byte[] b = byteArrayBitmapStream.toByteArray();
-	// encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-	// return encodedImage;
-	// }
+//	private String getStringFromBitmap(Image bitmapPicture) {
+//		String encodedImage;
+//		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+//		bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
+//		byte[] b = byteArrayBitmapStream.toByteArray();
+//		encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+//		return encodedImage;
+//	}
 }
