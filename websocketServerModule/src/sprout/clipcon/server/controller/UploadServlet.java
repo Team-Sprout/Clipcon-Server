@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -43,7 +44,7 @@ public class UploadServlet extends HttpServlet {
 
 	// 업로드 파일을 저장할 위치
 	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-//	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
+	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
 
 	private String userName = null;
 	private String groupPK = null;
@@ -51,12 +52,14 @@ public class UploadServlet extends HttpServlet {
 	private boolean flag = false;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoPost START");
 
@@ -65,10 +68,13 @@ public class UploadServlet extends HttpServlet {
 		System.out.print("req len = " + len + " kb (");
 		System.out.println((float) len / (1024 * 1024) + " mb)");
 
+		request.setCharacterEncoding("UTF-8");
+
 		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = uploadTime(); // Time that server get request msg
-		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: " + uploadTime + "\n");
+		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: "
+				+ uploadTime + "\n");
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
@@ -93,17 +99,18 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 
 				System.out.println("stringData: " + paramValue);
-			break;
+				break;
 
 			case "imageData":
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				group.addContents(uploadContents);
 
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
+						uploadContents.getContentsPKName());
 				MessageParser.addImageToMessage(uploadNoti, imageData);
-				
+
 				System.out.println("imageData: " + imageData.toString());
-			break;
+				break;
 
 			case "fileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
@@ -114,7 +121,7 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-			break;
+				break;
 
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
@@ -125,14 +132,13 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-			break;
+				break;
 
 			default:
 				System.out.println("어떤 형식에도 속하지 않음.");
 			}
 		}
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
-		
 
 		try {
 			group.sendAll(uploadNoti);
@@ -209,14 +215,6 @@ public class UploadServlet extends HttpServlet {
 		return ImageData;
 	}
 
-	// public ImageIcon getByteArrayByImage(Image image) throws IOException {
-	// // ImageIO.write(im, formatName, output)
-	// ByteArrayOutputStream out = new ByteArrayOutputStream();
-	// ImageIO.write(image, "JPEG", out);
-	// byte[] imageBytes = out.toByteArray();
-	// BufferedImage bi = ImageIO.read(new ByteArrayInputStream(imageBytes));
-	// }
-
 	/** 수신받은 File Data를 수신하는 Stream */
 	// 가 아니라 파일화 하는 역할
 	public void getFileDataStream(InputStream stream, String groupPK, String fileName) throws IOException {
@@ -270,7 +268,7 @@ public class UploadServlet extends HttpServlet {
 	 * Folder 생성 메서드
 	 * 
 	 * @param directoryName
-	 *            이 이름으로 Directory 생성
+	 *            - 이 이름으로 Directory 생성
 	 */
 	private void createDirectory(String directoryName) {
 		File receiveFolder = new File(directoryName);
@@ -283,41 +281,11 @@ public class UploadServlet extends HttpServlet {
 		}
 	}
 
-	/** @return Current Time YYYY-MM-DD HH:MM:SS  */
+	/** @return Current Time YYYY-MM-DD HH:MM:SS */
 	public String uploadTime() {
-		Calendar cal = Calendar.getInstance();
-		String year = Integer.toString(cal.get(Calendar.YEAR));
-		String month = Integer.toString(cal.get(Calendar.MONTH) + 1);
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 
-		String date = Integer.toString(cal.get(Calendar.DATE));
-		String hour = Integer.toString(cal.get(Calendar.HOUR_OF_DAY));
-		if (Integer.parseInt(hour) < 10) {
-			hour = "0" + hour;
-		}
-		if (Integer.parseInt(hour) > 12) {
-			hour = "PM " + Integer.toString(Integer.parseInt(hour) - 12);
-		} else {
-			hour = "AM " + hour;
-		}
-
-		String minute = Integer.toString(cal.get(Calendar.MINUTE));
-		if (Integer.parseInt(minute) < 10) {
-			minute = "0" + minute;
-		}
-		String sec = Integer.toString(cal.get(Calendar.SECOND));
-		if (Integer.parseInt(sec) < 10) {
-			sec = "0" + sec;
-		}
-
-		return year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + sec;
+		return sdf.format(date).toString();
 	}
-
-//	private String getStringFromBitmap(Image bitmapPicture) {
-//		String encodedImage;
-//		ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
-//		bitmapPicture.compress(Bitmap.CompressFormat.PNG, 100, byteArrayBitmapStream);
-//		byte[] b = byteArrayBitmapStream.toByteArray();
-//		encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
-//		return encodedImage;
-//	}
 }
