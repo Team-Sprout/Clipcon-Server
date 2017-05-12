@@ -12,14 +12,13 @@ public class TmpLog {
 	/** Print request Msg */
 	public static void requestMsgLog(HttpServletRequest request) {
 
-		/* server가 받은 request 시작줄 정보 */
+		/* request startline info */
 		System.out.println("==================STARTLINE==================");
 		System.out.println("Request Method: " + request.getMethod());
 		System.out.println("Request RequestURI: " + request.getRequestURI());
 		System.out.println("Request Protocol: " + request.getProtocol());
 
-		/* server가 받은 request 헤더 정보 */
-		/* server가 받은 기본적인 request header msg 정보 */
+		/* server request header info */
 		System.out.println("===================HEADER====================");
 		Enumeration headerNames = request.getHeaderNames();
 
@@ -47,23 +46,23 @@ public class TmpLog {
 		System.out.println();
 	}
 
-	/** Client로 response Msg 전달 */
+	/** send response message to client */
 	public static void responseMsgLog(HttpServletResponse response) {
 		PrintWriter writer;
 		try {
 			writer = response.getWriter();
 
 			response.setContentType("text/html");
-			// response.setCharacterEncoding("UTF-8");
+			response.setCharacterEncoding("UTF-8");
 
 			writer.println("Http Post Response: " + response.toString());
 
-			/* client가 받은 response 시작줄 정보 */
+			/* response status info */
 			writer.println("==================STARTLINE==================");
 			writer.println("Response Status: " + response.getStatus());
 			writer.println("Response ContentType: " + response.getContentType());
 
-			/* client가 받은 response 헤더 정보 */
+			/* response header info */
 			writer.println("==================HEADER=====================");
 			Collection<String> headerNames = response.getHeaderNames();
 
@@ -72,12 +71,10 @@ public class TmpLog {
 
 				writer.println(headerName + ": " + response.getHeader(headerName));
 			}
-
 			writer.println("===================ENTITY====================");
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

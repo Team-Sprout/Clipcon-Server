@@ -1,7 +1,7 @@
 package sprout.clipcon.server.model.message;
 
 /**
- * 클라이언트로 보낼 object(Message)를 string으로 encoding. */
+ * Encode object to send to client as string */
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;

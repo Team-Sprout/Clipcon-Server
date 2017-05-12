@@ -6,20 +6,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
@@ -31,23 +23,21 @@ import sprout.clipcon.server.model.Group;
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	// 파일을 저장되어있는 root location
-	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
-	// private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // 테스트 경로1
+	// root location where group folder exists
+	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // test path1
+	// private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // test path2
 
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
-	
+
 	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
-	
+
 	private Server server = Server.getInstance();
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
+	/** Constructor UploadServlet */
 	public DownloadServlet() {
 		super();
 	}
@@ -81,35 +71,35 @@ public class DownloadServlet extends HttpServlet {
 
 			sendStringData(stringData, response.getOutputStream());
 			break;
-			
+
 		case Contents.TYPE_IMAGE:
 			String imageFileName = contents.getContentsPKName();
 
 			response.setContentType("image/png");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
-			// dir에 있는 image file을 가져와 전송. (ByteArrayStream)
+			// Transfer the image file data in the directory. (ByteArrayStream)
 			sendFileData(imageFileName, response.getOutputStream());
 			break;
-			
+
 		case Contents.TYPE_FILE:
 			String fileName = contents.getContentsPKName();
-			
+
 			setHeaderForSendingFile(fileName, response);
-			// dir에 있는 file을 가져와 전송. (FileStream)
+			// Transfer the file data in the directory. (FileStream)
 			sendFileData(fileName, response.getOutputStream());
 			break;
-			
+
 		case Contents.TYPE_MULTIPLE_FILE:
 			String multipleFileName = contents.getContentsPKName();
-			
+
 			setHeaderForSendingFile(multipleFileName, response);
-			// dir에 있는 file을 가져와 전송. (FileStream)
+			// Transfer the zip(multiple) file data in the directory. (FileStream)
 			sendFileData(multipleFileName, response.getOutputStream());
 			break;
-			
+
 		default:
-			System.out.println("어떤 형식에도 속하지 않음.");
+			System.out.println("<<DOWNLOAD SERVLET>> It does not belong to any format.");
 		}
 		// responseMsgLog(response);
 	}
@@ -121,9 +111,9 @@ public class DownloadServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// doGet(request, response);
 	}
-	
+
 	/** Setting Header Info For Sending File and Multiple File */
-	public void setHeaderForSendingFile(String fileName, HttpServletResponse response){
+	public void setHeaderForSendingFile(String fileName, HttpServletResponse response) {
 		// response.setContentType("multipart/mixed");
 		response.setContentType("application/octet-stream");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
@@ -148,7 +138,7 @@ public class DownloadServlet extends HttpServlet {
 
 	/** Send Captured Image Data, File Data and Multiple Data */
 	public void sendFileData(String fileName, OutputStream outputStream) {
-		// 보낼 file data를 가져오기
+		// Get file data to send to client
 		File sendFileContents = new File(ROOT_LOCATION + groupPK + File.separator + fileName);
 
 		try {
