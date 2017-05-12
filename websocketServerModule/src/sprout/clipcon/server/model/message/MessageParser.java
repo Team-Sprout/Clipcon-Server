@@ -3,7 +3,6 @@ package sprout.clipcon.server.model.message;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
@@ -32,7 +31,7 @@ public class MessageParser {
 		}
 		message.add(Message.LIST, array);
 		return message;
-	
+
 	}
 
 	public static Message appendMessageByGroup(Message message, Group group) {
@@ -57,20 +56,20 @@ public class MessageParser {
 		System.out.println("image string: " + test);
 		return message;
 	}
-	
-	/** Image를 Resizing한 ImageIcon으로 return */
+
+	/** Return to reducing Image */
 	private static Image getResizingImageIcon(Image imageData) {
-		// FIXME: 이미지의 크기를 줄일 때, 비율을 맞출 것
-//		imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-//		return imageData;
-		return imageData; // 임시로 원본 전송
+		// FIXME: When reducing the size of an image, Reduce to image ratio
+		// imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
+		// return imageData;
+		return imageData; // Temporarily - transfer the original
 	}
-	
+
 	private static String getBase64StringByImage(Image image) {
 		byte[] imageBytes = getImgBytes(image);
 		return Base64.getEncoder().encodeToString(imageBytes);
 	}
-	
+
 	private static byte[] getImgBytes(Image image) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
@@ -80,22 +79,22 @@ public class MessageParser {
 		}
 		return baos.toByteArray();
 	}
-	
+
 	private static BufferedImage toBufferedImage(Image img) {
-	    if (img instanceof BufferedImage) {
-	        return (BufferedImage) img;
-	    }
+		if (img instanceof BufferedImage) {
+			return (BufferedImage) img;
+		}
 
-	    // Create a buffered image with transparency
-	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+		// Create a buffered image with transparency
+		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-	    // Draw the image on to the buffered image
-	    Graphics2D bGr = bimage.createGraphics();
-	    bGr.drawImage(img, 0, 0, null);
-	    bGr.dispose();
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bimage.createGraphics();
+		bGr.drawImage(img, 0, 0, null);
+		bGr.dispose();
 
-	    // Return the buffered image
-	    return bimage;
+		// Return the buffered image
+		return bimage;
 	}
 
 	public static void main(String[] args) {

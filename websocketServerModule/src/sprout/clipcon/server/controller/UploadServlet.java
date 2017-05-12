@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
@@ -29,8 +28,8 @@ import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
 
-/* maxFileSize: 최대 파일 크기(100MB)
- * fileSizeThreshold: 1MB 이하의 파일은 메모리에서 바로 사용
+/* maxFileSize: Max File Size(100MB)
+ * fileSizeThreshold: Files less than 1MB used directly in memory
  * maxRequestSize:  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
@@ -38,11 +37,11 @@ public class UploadServlet extends HttpServlet {
 
 	private Server server = Server.getInstance();
 
+	/** Constructor UploadServlet */
 	public UploadServlet() {
-		System.out.println("UploadServlet 생성");
 	}
 
-	// 업로드 파일을 저장할 위치
+	// root location where to save the upload file
 	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
 	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
 
@@ -78,7 +77,7 @@ public class UploadServlet extends HttpServlet {
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // Notification message generation, notification type "Data upload"
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
 
@@ -119,7 +118,7 @@ public class UploadServlet extends HttpServlet {
 				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
-				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
+				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				break;
 
@@ -130,12 +129,12 @@ public class UploadServlet extends HttpServlet {
 				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
-				// groupPK 폴더에 실제 File(파일명: 고유키) 저장
+				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				break;
 
 			default:
-				System.out.println("어떤 형식에도 속하지 않음.");
+				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
 			}
 		}
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
@@ -147,16 +146,16 @@ public class UploadServlet extends HttpServlet {
 		}
 		System.out.println();
 
-		System.out.println("서블릿 끝");
+		System.out.println("End of servlet");
 		Date ed = new Date();
 		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
-		System.out.println("소요시간 = " + t + "초");
-		System.out.print("속도 = " + (float) len / t + " kb/s (");
+		System.out.println("Time = " + t + "sec");
+		System.out.print("Speed = " + (float) len / t + " kb/s (");
 		System.out.println((float) len / t / (1024 * 1024) + " mb/s)");
 		// responseMsgLog(response);
 	}
 
-	/** String Data를 수신하는 Stream */
+	/** The stream that receives the String data */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 		StringBuilder stringBuilder = new StringBuilder();
@@ -178,12 +177,12 @@ public class UploadServlet extends HttpServlet {
 		return stringBuilder.toString();
 	}
 
-	/** Image Data를 수신하는 Stream */
+	/** The stream that receives the Captured Image data */
 	public Image getImageDataStream(InputStream stream, String groupPK, String imagefileName) throws IOException {
 		byte[] imageInByte;
-		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+		String saveFilePath = RECEIVE_LOCATION + groupPK; // Save to a folder in the group to which the user belongs
 
-		// 업로드한 파일을 저장할 그룹 폴더 생성
+		// Create a group folder(using groupPK) to store uploaded files
 		createDirectory(saveFilePath);
 
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
@@ -202,24 +201,23 @@ public class UploadServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-
 		// convert byte array back to BufferedImage
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageInByte);
 		BufferedImage bImageFromConvert = ImageIO.read(byteArrayInputStream);
 
-		// file 형태로 저장
+		// Save as file
 		ImageIO.write(bImageFromConvert, "png", new File(saveFilePath, imagefileName));
 
-		// image 객체로 변환
+		// Convert to image object
 		Image ImageData = (Image) bImageFromConvert;
 		return ImageData;
 	}
 
-	/** 수신받은 File Data를 수신하는 Stream */
+	/** The stream that receives the File Data and make real file */
 	// 가 아니라 파일화 하는 역할
 	public void getFileDataStream(InputStream stream, String groupPK, String fileName) throws IOException {
 		Date start = new Date();
-		String saveFilePath = RECEIVE_LOCATION + groupPK; // 사용자가 속한 그룹의 폴더에 저장
+		String saveFilePath = RECEIVE_LOCATION + groupPK; // Save to a folder in the group to which the user belongs
 		String saveFileFullPath = saveFilePath + File.separator + fileName;
 
 		// opens an output stream to save into file
@@ -236,7 +234,7 @@ public class UploadServlet extends HttpServlet {
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
 			fileOutputStream.flush();
-			System.out.println("루프 횟수 = " + testCnt);
+			System.out.println("Number of loops = " + testCnt);
 			flag = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -249,10 +247,10 @@ public class UploadServlet extends HttpServlet {
 			}
 		}
 		Date end = new Date();
-		System.out.println("소요시간: " + (end.getTime() - start.getTime()));
+		System.out.println("Time: " + (end.getTime() - start.getTime()));
 	}
 
-	/** Request Header "content-disposition"에서 filename 추출 */
+	/** Extract filename from Request Header "content-disposition" */
 	private String getFilenameInHeader(String requestHeader) {
 		int beginIndex = requestHeader.indexOf("filename") + 10;
 		int endIndex = requestHeader.length() - 1;
@@ -263,21 +261,20 @@ public class UploadServlet extends HttpServlet {
 		return fileName;
 	}
 
-	// XXX: 모델 구현 시, 확인하기
+	// XXX: CHECK!! When model implementation
 	/**
-	 * Folder 생성 메서드
+	 * Create a directory
 	 * 
 	 * @param directoryName
-	 *            - 이 이름으로 Directory 생성
+	 *            The name of the directory you want to create
 	 */
 	private void createDirectory(String directoryName) {
 		File receiveFolder = new File(directoryName);
 		System.out.println("directoryName: " + directoryName);
 
-		// 저장할 그룹 폴더가 존재하지 않으면
 		if (!receiveFolder.exists()) {
-			receiveFolder.mkdir(); // 폴더 생성
-			System.out.println("------------------------------------" + directoryName + " 폴더 생성");
+			receiveFolder.mkdir(); // Create Directory
+			System.out.println("------------------------------------" + directoryName + " Create Directory");
 		}
 	}
 

@@ -1,6 +1,5 @@
 package sprout.clipcon.server.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +31,16 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out.println("자신을 제외한 그룹 전체에게 보내다.");
+		System.out.println("Send it to all groups except oneself.");
 		for (String key : users.keySet()) {
-			if (key.equals(user)) // 제외
+			if (key.equals(user)) // except
 				continue;
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
 	}
 
 	public void sendAll(Message message) throws IOException, EncodeException {
-		System.out.println("그룹 전체에게 보내다.");
+		System.out.println("Send it to the whole group.");
 		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
@@ -51,7 +50,7 @@ public class Group {
 		String tmpName = getTempUsername();
 
 		users.put(tmpName, session);
-		System.out.println("새 유저가 그룹에 입장");
+		System.out.println("New user enters group");
 		return tmpName;
 	}
 

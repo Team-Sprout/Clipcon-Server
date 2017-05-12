@@ -1,16 +1,9 @@
 package sprout.clipcon.server.model;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import sprout.clipcon.server.controller.UserController;
 
 @Getter
 @Setter
@@ -28,7 +21,7 @@ public class Contents {
 	private String uploadUserName;
 	private String uploadTime;
 
-	// String Type: String값, (single) File Type: FileOriginName
+	// String Type: String object value, (single) File Type: FileOriginName
 	private String contentsValue = "";
 
 	private int primaryKey = 0;
