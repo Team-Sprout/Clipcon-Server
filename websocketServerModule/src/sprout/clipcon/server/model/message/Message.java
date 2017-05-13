@@ -71,10 +71,12 @@ public class Message {
 
 	public final static String REQUEST_CREATE_GROUP = "request/create group";
 	public final static String REQUEST_JOIN_GROUP = "request/join group";
+	public final static String REQUEST_EXIT_GROUP = "request/exit group";
 	public final static String REQUEST_TEST = "request/test";
 
 	public final static String RESPONSE_CREATE_GROUP = "response/create group";
 	public final static String RESPONSE_JOIN_GROUP = "response/join group";
+	public final static String RESPONSE_EXIT_GROUP = "response/exit group";
 	
 	public final static String NOTI_ADD_PARTICIPANT = "noti/add participant";
 	public final static String NOTI_EXIT_PARTICIPANT = "noti/exit participant";
