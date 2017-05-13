@@ -80,6 +80,29 @@ public class UserController {
 				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
 			}
 			break;
+			
+		case Message.REQUEST_EXIT_GROUP: /* 요청 타입: 그룹 나가기 */
+
+			server = Server.getInstance();
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
+
+			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP); // 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답"
+			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
+				userName = incomingMessage.get(Message.NAME);
+				group.removeUser(userName); // 그룹에 자신을 삭제
+				
+				responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
+				responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
+				MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
+
+				Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "나간 사용자에 대한 정보"
+				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
+				group.sendAll(noti); //그룹원 모두에게 나간 사용자에 대한 정보 전송
+
+			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
+			}
+			break;
 
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
