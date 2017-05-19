@@ -21,7 +21,6 @@ import sprout.clipcon.server.model.message.Message;
 @NoArgsConstructor
 public class Group {
 	private String primaryKey;
-	private String name;
 	private Map<String, UserController> users = Collections.synchronizedMap(new HashMap<String, UserController>());
 	private History history;
 
@@ -31,7 +30,7 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out.println("Send it to all groups except oneself.");
+		System.out.println("[SERVER] sned message to all users of group except \""+ user + "\" : " + message.toString());
 		for (String key : users.keySet()) {
 			if (key.equals(user)) // except
 				continue;
@@ -40,7 +39,7 @@ public class Group {
 	}
 
 	public void sendAll(Message message) throws IOException, EncodeException {
-		System.out.println("Send it to the whole group.");
+		System.out.println("[SERVER] send message to all user of group: " + message.toString());
 		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
@@ -48,9 +47,8 @@ public class Group {
 
 	public String addUser(String name, UserController session) {
 		String tmpName = getTempUsername();
-
 		users.put(tmpName, session);
-		System.out.println("New user enters group");
+		System.out.println("[SERVER] new user take part in group: " + primaryKey + ":" + name);
 		return tmpName;
 	}
 

@@ -19,8 +19,7 @@ public class MessageDecoder implements Decoder.Text<Message> {
 	}
 
 	public Message decode(String incomingMessage) throws DecodeException {
-		System.out.println("=============== Check the received string from client ===============\n" + incomingMessage
-				+ "\n---------------------------------------------------");
+		System.out.println("=============== Check the received string from client ===============\n" + incomingMessage + "\n---------------------------------------------------");
 		Message message = new Message().setJson(incomingMessage);
 		// message.setJson(incommingMessage);
 

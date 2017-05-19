@@ -2,7 +2,9 @@ package sprout.clipcon.server.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -14,6 +16,7 @@ public class Server {
 	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
+	// change source 
 	private Server() {
 	}
 
@@ -56,13 +59,13 @@ public class Server {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
 		for (int i = 0; i < length; i++) {
-			int rIndex = rnd.nextInt(3);
+			int rIndex = rnd.nextInt(2) +1;
 			switch (rIndex) {
-			case 0:
-				temp.append((char) ((int) (rnd.nextInt(26)) + 97));
-				break;
+//			case 0:				
+// 			temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+//				bre;
 			case 1:
-				temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+				temp.append((char) ((int) (rnd.nextInt(26)) + 97));
 				break;
 			case 2:
 				temp.append((rnd.nextInt(10)));
@@ -90,7 +93,10 @@ public class Server {
 		}
 	}
 
+	
 	public static void main(String[] args) {
-		subDirList("C:\\Users\\delf\\Desktop\\dev");
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd, a hh:mm:ss"); 
+		System.out.println(sdf.format(date).toString()); 
 	}
 }

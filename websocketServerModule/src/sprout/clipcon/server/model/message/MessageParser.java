@@ -22,7 +22,6 @@ public class MessageParser {
 	public static Message addMessageToGroup(Message message, Group group) {
 		message.add(Message.GROUP_PK, group.getPrimaryKey());
 		List<String> userList = group.getUserList();
-		System.out.println("list size: " + userList.size());
 
 		JSONArray array = new JSONArray();
 		Iterator<String> it = userList.iterator();

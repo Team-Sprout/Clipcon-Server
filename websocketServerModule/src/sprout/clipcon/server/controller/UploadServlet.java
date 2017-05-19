@@ -41,9 +41,9 @@ public class UploadServlet extends HttpServlet {
 	public UploadServlet() {
 	}
 
-	// root location where to save the upload file
-	private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-	// private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
+	// 업로드 파일을 저장할 위치
+	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
+	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
 
 	private String userName = null;
 	private String groupPK = null;
@@ -72,23 +72,23 @@ public class UploadServlet extends HttpServlet {
 		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = uploadTime(); // Time that server get request msg
-		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", uploadTime: "
-				+ uploadTime + "\n");
+		System.out.println("[SERVER] == Parameter info == \n **userName: " + userName + "\n *groupPK: " + groupPK + "\n *uploadTime: " + uploadTime);
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // Notification message generation, notification type "Data upload"
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
+		System.out.println("[DELF] 로그 부분 주석처리 했음");
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
 
 			/*
 			 * To find out file name, parse header value of content-disposition e.g. form-data; name="file"; filename=""
 			 */
-			System.out.println("\n<headerName: headerValue>");
-			for (String headerName : part.getHeaderNames()) {
-				System.out.println(headerName + ": " + part.getHeader(headerName));
-			}
-			System.out.println("...........>> " + partName);
+//			System.out.println("\n<headerName: headerValue>");
+//			for (String headerName : part.getHeaderNames()) {
+//				System.out.println(headerName + ": " + part.getHeader(headerName));
+//			}
+//			 System.out.println("...........>> " + partName);
 
 			switch (partName) {
 			case "stringData":
@@ -120,8 +120,8 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				break;
 
+			break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
 
@@ -135,6 +135,7 @@ public class UploadServlet extends HttpServlet {
 
 			default:
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
+				System.out.print("loop/");
 			}
 		}
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
