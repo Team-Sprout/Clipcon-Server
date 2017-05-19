@@ -120,8 +120,8 @@ public class UploadServlet extends HttpServlet {
 				group.addContents(uploadContents);
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
-				break;
 
+			break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
 
