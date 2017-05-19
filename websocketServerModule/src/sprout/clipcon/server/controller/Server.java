@@ -16,6 +16,7 @@ public class Server {
 	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
+	// change source 
 	private Server() {
 	}
 

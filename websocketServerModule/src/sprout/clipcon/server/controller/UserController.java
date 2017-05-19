@@ -26,6 +26,7 @@ public class UserController {
 	private Session session;
 	private String userName;
 
+	// change source
 	@OnOpen
 	public void handleOpen(Session userSession) {
 		this.session = userSession;
