@@ -35,7 +35,6 @@ public class UserController {
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
 		System.out.println("[SERVER] message from client: " + incomingMessage.toString());
-
 		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
 
 		if (session != userSession) { // for test
@@ -112,7 +111,6 @@ public class UserController {
 			System.out.println("예외사항");
 		break;
 		}
-
 		sendMessage(session, responseMsg); // 전송
 	}
 

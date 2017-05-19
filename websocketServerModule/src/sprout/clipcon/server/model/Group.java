@@ -30,7 +30,7 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out.println("[SERVER] sned message to all users of group except oneself. \""+ user + "\" : " + message.toString());
+		System.out.println("[SERVER] sned message to all users of group except \""+ user + "\" : " + message.toString());
 		for (String key : users.keySet()) {
 			if (key.equals(user)) // except
 				continue;
