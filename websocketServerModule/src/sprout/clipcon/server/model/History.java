@@ -24,6 +24,8 @@ public class History {
 	public void addContents(Contents contents) {
 		contents.setContentsPKName(Integer.toString(++contentsPKValue));
 		contentsMap.put(contents.getContentsPKName(), contents);
+		
+		System.out.println("\n[SERVER] add the new contents. pk is " + contents.getPrimaryKey());
 	}
 
 	/** Return contents that match the primary key value that distinguishes the data */

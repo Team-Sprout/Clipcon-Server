@@ -23,9 +23,9 @@ import sprout.clipcon.server.model.Group;
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	// root location where group folder exists
-	private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // test path1
-	// private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // test path2
+	// 파일을 저장되어있는 root location
+	// private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
+	private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // 테스트 경로1
 
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
@@ -45,8 +45,7 @@ public class DownloadServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoGet START");
 
@@ -55,8 +54,7 @@ public class DownloadServlet extends HttpServlet {
 		groupPK = request.getParameter("groupPK");
 		downloadDataPK = request.getParameter("downloadDataPK");
 
-		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: "
-				+ downloadDataPK + "\n");
+		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK + "\n");
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
 		Contents contents = group.getContents(downloadDataPK);
@@ -70,7 +68,7 @@ public class DownloadServlet extends HttpServlet {
 			response.setContentType("text/plain; charset=UTF-8");
 
 			sendStringData(stringData, response.getOutputStream());
-			break;
+		break;
 
 		case Contents.TYPE_IMAGE:
 			String imageFileName = contents.getContentsPKName();
@@ -80,7 +78,7 @@ public class DownloadServlet extends HttpServlet {
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 			// Transfer the image file data in the directory. (ByteArrayStream)
 			sendFileData(imageFileName, response.getOutputStream());
-			break;
+		break;
 
 		case Contents.TYPE_FILE:
 			String fileName = contents.getContentsPKName();
@@ -88,7 +86,7 @@ public class DownloadServlet extends HttpServlet {
 			setHeaderForSendingFile(fileName, response);
 			// Transfer the file data in the directory. (FileStream)
 			sendFileData(fileName, response.getOutputStream());
-			break;
+		break;
 
 		case Contents.TYPE_MULTIPLE_FILE:
 			String multipleFileName = contents.getContentsPKName();
@@ -96,10 +94,12 @@ public class DownloadServlet extends HttpServlet {
 			setHeaderForSendingFile(multipleFileName, response);
 			// Transfer the zip(multiple) file data in the directory. (FileStream)
 			sendFileData(multipleFileName, response.getOutputStream());
-			break;
+		break;
 
 		default:
 			System.out.println("<<DOWNLOAD SERVLET>> It does not belong to any format.");
+			System.out.print("loop/");
+			// System.out.println("어떤 형식에도 속하지 않음.");
 		}
 		// responseMsgLog(response);
 	}
@@ -107,8 +107,7 @@ public class DownloadServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// doGet(request, response);
 	}
 

@@ -29,10 +29,13 @@ public class UserController {
 	@OnOpen
 	public void handleOpen(Session userSession) {
 		this.session = userSession;
+		System.out.println("session is opened");
 	}
 
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
+		System.out.println("[SERVER] message from client: " + incomingMessage.toString());
+
 		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
 
 		if (session != userSession) { // for test
@@ -58,7 +61,7 @@ public class UserController {
 			responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
 			MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
 
-			break;
+		break;
 
 		case Message.REQUEST_JOIN_GROUP: /* 요청 타입: 그룹 참가 */
 
@@ -79,8 +82,8 @@ public class UserController {
 			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
 			}
-			break;
-			
+		break;
+
 		case Message.REQUEST_EXIT_GROUP: /* 요청 타입: 그룹 나가기 */
 
 			server = Server.getInstance();
@@ -90,27 +93,26 @@ public class UserController {
 			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
 				userName = incomingMessage.get(Message.NAME);
 				group.removeUser(userName); // 그룹에 자신을 삭제
-				
+
 				responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
 				responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
 				MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
 
 				Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "나간 사용자에 대한 정보"
 				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
-				group.sendAll(noti); //그룹원 모두에게 나간 사용자에 대한 정보 전송
+				group.sendAll(noti); // 그룹원 모두에게 나간 사용자에 대한 정보 전송
 
 			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
 			}
-			break;
+		break;
 
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
-			break;
+		break;
 		}
-		System.out.println("============ 클라이언트에게 보낸 메시지 ============\n" + responseMsg
-				+ "\n---------------------------------------------------");
+
 		sendMessage(session, responseMsg); // 전송
 	}
 
@@ -140,6 +142,7 @@ public class UserController {
 	}
 
 	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
+		System.out.println("[SERVER] meesage to client: " + message);
 		session.getBasicRemote().sendObject(message);
 	}
 
