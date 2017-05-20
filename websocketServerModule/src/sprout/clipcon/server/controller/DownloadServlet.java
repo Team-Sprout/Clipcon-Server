@@ -22,10 +22,11 @@ import sprout.clipcon.server.model.Group;
 @WebServlet("/DownloadServlet")
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	private Server server = Server.getInstance();
 
-	// 파일을 저장되어있는 root location
-	// private final String ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // 테스트 경로2
-	private final String ROOT_LOCATION = "C:\\Users\\Delf\\Desktop\\"; // 테스트 경로1
+	// root location where group folder exists
+	 private final String ROOT_LOCATION = Server.RECEIVE_LOCATION;
 
 	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
@@ -34,8 +35,6 @@ public class DownloadServlet extends HttpServlet {
 	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
-
-	private Server server = Server.getInstance();
 
 	/** Constructor UploadServlet */
 	public DownloadServlet() {
@@ -99,7 +98,6 @@ public class DownloadServlet extends HttpServlet {
 		default:
 			System.out.println("<<DOWNLOAD SERVLET>> It does not belong to any format.");
 			System.out.print("loop/");
-			// System.out.println("어떤 형식에도 속하지 않음.");
 		}
 		// responseMsgLog(response);
 	}

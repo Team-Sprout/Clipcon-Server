@@ -100,7 +100,12 @@ public class UserController {
 
 				Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "나간 사용자에 대한 정보"
 				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
-				group.sendAll(noti); // 그룹원 모두에게 나간 사용자에 대한 정보 전송
+				boolean whetherToDestroy = group.sendAll(noti); // 그룹원 모두에게 나간 사용자에 대한 정보 전송
+				
+				//그룹을 파기한다.(서버 그룹 목록에서 삭제, 그룹 폴더 및 하위 파일들 삭제)
+				if(whetherToDestroy == true){
+					server.destroyGroup(group.getPrimaryKey());
+				}
 
 			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
 				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
