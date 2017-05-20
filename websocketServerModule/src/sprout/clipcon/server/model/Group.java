@@ -38,11 +38,17 @@ public class Group {
 		}
 	}
 
-	public void sendAll(Message message) throws IOException, EncodeException {
+	public boolean sendAll(Message message) throws IOException, EncodeException {
 		System.out.println("[SERVER] send message to all user of group: " + message.toString());
+		
+		if(users.size() == 0){
+			return true;
+		}
+		
 		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
+		return false;
 	}
 
 	public String addUser(String name, UserController session) {

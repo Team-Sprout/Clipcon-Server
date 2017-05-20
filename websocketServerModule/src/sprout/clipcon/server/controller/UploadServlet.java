@@ -35,20 +35,21 @@ import sprout.clipcon.server.model.message.MessageParser;
 @WebServlet("/UploadServlet")
 public class UploadServlet extends HttpServlet {
 
+	private static final long serialVersionUID = 3432460337698180662L;
+
 	private Server server = Server.getInstance();
 
-	/** Constructor UploadServlet */
-	public UploadServlet() {
-	}
-
-	// 업로드 파일을 저장할 위치
-	// private final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-	private final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; // 
+	// root location where to save the upload file
+	private final String RECEIVE_LOCATION = Server.RECEIVE_LOCATION;
 
 	private String userName = null;
 	private String groupPK = null;
 	private String uploadTime = null;
 	private boolean flag = false;
+	
+	/** Constructor UploadServlet */
+	public UploadServlet() {
+	}
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -76,19 +77,12 @@ public class UploadServlet extends HttpServlet {
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); // 알림 메시지 생성, 알림 타입은 "데이터 업로드"
-		System.out.println("[DELF] 로그 부분 주석처리 했음");
+		
+		// Notification message generation, notification type "Data upload"
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); 
+		
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
-
-			/*
-			 * To find out file name, parse header value of content-disposition e.g. form-data; name="file"; filename=""
-			 */
-//			System.out.println("\n<headerName: headerValue>");
-//			for (String headerName : part.getHeaderNames()) {
-//				System.out.println(headerName + ": " + part.getHeader(headerName));
-//			}
-//			 System.out.println("...........>> " + partName);
 
 			switch (partName) {
 			case "stringData":
