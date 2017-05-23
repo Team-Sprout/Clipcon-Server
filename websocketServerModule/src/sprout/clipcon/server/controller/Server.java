@@ -17,8 +17,8 @@ public class Server {
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
 	// 업로드 파일을 저장할 위치
-	public static final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-//	public static final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
+	// public static final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
+	public static final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\clipcon_download\\"; //
 
 	// change source
 	private Server() {
@@ -87,6 +87,22 @@ public class Server {
 				file.delete();
 			}
 		}
+	}
+	
+	public void removeGroup(Group group) {
+		System.out.println("[hotfix]------------------------------- removeGroup(Group group):Server.java");
+		// groups.remove(group);
+		if(group == null) {
+			System.out.println("group is null");
+		}
+		else {
+			System.out.println("group key is " + group.getPrimaryKey());
+		}
+		Group removeGroup = groups.remove(group.getPrimaryKey());
+		if(removeGroup == null) {
+			System.out.println("removeGroup is null");
+		}
+		deleteAllFilesInGroupDir(removeGroup.getPrimaryKey());
 	}
 
 	/**

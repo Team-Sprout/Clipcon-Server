@@ -28,7 +28,7 @@ public class DownloadServlet extends HttpServlet {
 	// root location where group folder exists
 	 private final String ROOT_LOCATION = Server.RECEIVE_LOCATION;
 
-	private static final int CHUNKSIZE = 4096;
+	private static final int CHUNKSIZE = 1024;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
 
@@ -55,8 +55,15 @@ public class DownloadServlet extends HttpServlet {
 
 		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK + "\n");
 
+		
 		Group group = server.getGroupByPrimaryKey(groupPK);
+		if(group == null) {
+			System.out.println("[SYSTEM] group is null");
+		}
 		Contents contents = group.getContents(downloadDataPK);
+		if(contents == null) {
+			System.out.println("[SYSTEM] contents is null");
+		}
 		String contentsType = contents.getContentsType();
 
 		switch (contentsType) {
@@ -142,7 +149,7 @@ public class DownloadServlet extends HttpServlet {
 			FileInputStream inputStream = new FileInputStream(sendFileContents);
 			byte[] buffer = new byte[CHUNKSIZE];
 			int bytesRead = -1;
-
+			System.out.println("[DEBUG] delf: byte size: " + buffer.length);
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, bytesRead);
 			}
