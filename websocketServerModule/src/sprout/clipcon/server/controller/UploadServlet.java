@@ -52,14 +52,12 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoPost START");
 
@@ -98,8 +96,7 @@ public class UploadServlet extends HttpServlet {
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				group.addContents(uploadContents);
 
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
-						uploadContents.getContentsPKName());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				MessageParser.addImageToMessage(uploadNoti, imageData);
 
 				System.out.println("imageData: " + imageData.toString());
@@ -115,7 +112,7 @@ public class UploadServlet extends HttpServlet {
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 
-			break;
+				break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
 
@@ -181,7 +178,7 @@ public class UploadServlet extends HttpServlet {
 		createDirectory(saveFilePath);
 
 		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
-			byte[] buffer = new byte[0xFFFF]; // 65536
+			byte[] buffer = new byte[0xFFFF]; // 65536 // 충돌 유도
 
 			for (int len; (len = stream.read(buffer)) != -1;)
 				byteArrayOutputStream.write(buffer, 0, len);
@@ -219,7 +216,7 @@ public class UploadServlet extends HttpServlet {
 		FileOutputStream fileOutputStream = new FileOutputStream(saveFileFullPath);
 
 		int bytesRead = -1;
-		byte[] buffer = new byte[0xFFFF]; // 65536
+		byte[] buffer = new byte[0xffff]; // 65536
 
 		int testCnt = 0;
 		try {
