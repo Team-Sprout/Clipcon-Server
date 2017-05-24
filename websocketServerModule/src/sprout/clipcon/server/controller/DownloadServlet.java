@@ -57,6 +57,8 @@ public class DownloadServlet extends HttpServlet {
 
 		
 		Group group = server.getGroupByPrimaryKey(groupPK);
+		
+		Contents contents = group.getContents(downloadDataPK);
 		String contentsType = contents.getContentsType();
 
 		switch (contentsType) {
