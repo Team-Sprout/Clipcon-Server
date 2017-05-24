@@ -28,7 +28,7 @@ public class DownloadServlet extends HttpServlet {
 	// root location where group folder exists
 	 private final String ROOT_LOCATION = Server.RECEIVE_LOCATION;
 
-	private static final int CHUNKSIZE = 1024;
+	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
 
