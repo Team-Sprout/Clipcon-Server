@@ -57,13 +57,6 @@ public class DownloadServlet extends HttpServlet {
 
 		
 		Group group = server.getGroupByPrimaryKey(groupPK);
-		if(group == null) {
-			System.out.println("[SYSTEM] group is null");
-		}
-		Contents contents = group.getContents(downloadDataPK);
-		if(contents == null) {
-			System.out.println("[SYSTEM] contents is null");
-		}
 		String contentsType = contents.getContentsType();
 
 		switch (contentsType) {
