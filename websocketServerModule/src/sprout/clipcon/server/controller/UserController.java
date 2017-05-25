@@ -90,38 +90,15 @@ public class UserController {
 			}
 			break;
 
-		/* Request Type: Exit Group */
-		case Message.REQUEST_EXIT_GROUP:
-
-			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
-
-			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP); // 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답"
-
-			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
-				userName = incomingMessage.get(Message.NAME);
-				group.removeUser(userName); // 그룹에 자신을 삭제
-
-				responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
-				responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
-				MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
-
-				Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "나간 사용자에 대한 정보"
-				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
-				boolean whetherToDestroy = group.sendAll(noti); // 그룹원 모두에게 나간 사용자에 대한 정보 전송
-
-				// 그룹을 파기한다.(서버 그룹 목록에서 삭제, 그룹 폴더 및 하위 파일들 삭제)
-				if (whetherToDestroy == true) {
-					server.destroyGroup(group.getPrimaryKey());
-				}
-
-			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
-				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
-			}
-			break;
-
-		/* Request Type: Change Nickname */
-		case Message.REQUEST_CHANGE_NAME:
+  /* Request Type: Exit Group */
+	case Message.REQUEST_EXIT_GROUP:
+        
+			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
+			exitUserAtGroup();
+		break;
+        
+  /* Request Type: Change Nickname */
+	case Message.REQUEST_CHANGE_NAME:
 
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
 
@@ -137,7 +114,6 @@ public class UserController {
 			noti.add(Message.NAME, originName); // add user's origin name
 			noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
 			group.sendWithout(originName, noti);
-
 			break;
 
 		default:
@@ -150,13 +126,28 @@ public class UserController {
 
 	@OnClose
 	public void handleClose(Session userSession) {
-		System.out.println("나감");
 		if (userSession == null) {
-			System.out.println("세션이 null");
+			System.out.println("Session is null");
 		}
+		System.err.println("[UserController] Session is closed. User terminated the program.");
+		exitUserAtGroup();
+	}
 
-		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: Outgoing user's info
-		noti.add(Message.PARTICIPANT_NAME, userName); // add Outgoing user's info
+	@OnError
+	public void handleError(Throwable t) {
+		System.err.println("[UserController] Error was occured.");
+		t.printStackTrace();
+	}
+
+	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
+		System.out.println("[UserController] message to client: " + message);
+		session.getBasicRemote().sendObject(message);
+	}
+  
+  private void exitUserAtGroup() {
+		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: outgoing user's info
+		noti.add(Message.PARTICIPANT_NAME, userName); // add outgoing user's info
+
 		try {
 			group.sendWithout(userName, noti);
 		} catch (IOException e) {
@@ -165,26 +156,11 @@ public class UserController {
 			e.printStackTrace();
 		}
 		group.removeUser(userName);
-	}
-
-	@OnError
-	public void handleError(Throwable t) {
-		System.out.println("오류 발생");
-		t.printStackTrace();
-	}
-
-	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
-		System.out.println("[UserController] message to client: " + message);
-		session.getBasicRemote().sendObject(message);
-	}
-
-	// for test and debugging
-	private String createTmpGroup() {
-		Group group = server.createGroup();
-		if (group == null) {
-			System.out.println("그룹이 만들어지지 않음");
+		
+		if(group.getSize() == 0) {
+			Server.getInstance().removeGroup(group);
 		}
-		return group.getPrimaryKey();
+		System.out.println("[UserController] User leaves the group.");
 	}
 
 	// test main method

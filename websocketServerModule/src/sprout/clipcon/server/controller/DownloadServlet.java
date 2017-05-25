@@ -56,7 +56,9 @@ public class DownloadServlet extends HttpServlet {
 		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: "
 				+ downloadDataPK + "\n");
 
+		
 		Group group = server.getGroupByPrimaryKey(groupPK);
+		
 		Contents contents = group.getContents(downloadDataPK);
 		String contentsType = contents.getContentsType();
 
@@ -149,7 +151,7 @@ public class DownloadServlet extends HttpServlet {
 			FileInputStream inputStream = new FileInputStream(sendFileContents);
 			byte[] buffer = new byte[CHUNKSIZE];
 			int bytesRead = -1;
-
+			System.out.println("[DEBUG] delf: byte size: " + buffer.length);
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, bytesRead);
 			}
