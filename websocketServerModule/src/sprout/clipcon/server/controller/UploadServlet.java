@@ -46,7 +46,7 @@ public class UploadServlet extends HttpServlet {
 	private String groupPK = null;
 	private String uploadTime = null;
 	private boolean flag = false;
-	
+
 	/** Constructor UploadServlet */
 	public UploadServlet() {
 	}
@@ -73,14 +73,16 @@ public class UploadServlet extends HttpServlet {
 		userName = request.getParameter("userName");
 		groupPK = request.getParameter("groupPK");
 		uploadTime = uploadTime(); // Time that server get request msg
-		System.out.println("[SERVER] == Parameter info == \n **userName: " + userName + "\n *groupPK: " + groupPK + "\n *uploadTime: " + uploadTime);
+		System.out.println("[SERVER] == Parameter info == \n **userName: " + userName + "\n *groupPK: " + groupPK
+				+ "\n *uploadTime: " + uploadTime);
+
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
 		Contents uploadContents = null;
-		
+
 		// Notification message generation, notification type "Data upload"
-		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA); 
-		
+		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);
+
 		for (Part part : request.getParts()) {
 			String partName = part.getName();
 
@@ -89,6 +91,8 @@ public class UploadServlet extends HttpServlet {
 				String paramValue = getStringFromStream(part.getInputStream());
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
+
+				System.out.println("[for test]group toString: " + group.toString());
 				group.addContents(uploadContents);
 
 				System.out.println("stringData: " + paramValue);
@@ -115,7 +119,7 @@ public class UploadServlet extends HttpServlet {
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 
-			break;
+				break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
 
@@ -129,7 +133,6 @@ public class UploadServlet extends HttpServlet {
 
 			default:
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
-				System.out.print("loop/");
 			}
 		}
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
@@ -180,15 +183,20 @@ public class UploadServlet extends HttpServlet {
 		// Create a group folder(using groupPK) to store uploaded files
 		createDirectory(saveFilePath);
 
-		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();) {
+		try {
+			// opens an output stream to save into file
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+			int bytesRead = -1;
 			byte[] buffer = new byte[0xFFFF]; // 65536
 
-			for (int len; (len = stream.read(buffer)) != -1;)
-				byteArrayOutputStream.write(buffer, 0, len);
-
+			// input stream from the HTTP connection
+			while ((bytesRead = stream.read(buffer)) != -1) {
+				byteArrayOutputStream.write(buffer, 0, bytesRead);
+			}
 			byteArrayOutputStream.flush();
-
 			imageInByte = byteArrayOutputStream.toByteArray();
+
 		} finally {
 			try {
 				stream.close();
@@ -220,17 +228,24 @@ public class UploadServlet extends HttpServlet {
 
 		int bytesRead = -1;
 		byte[] buffer = new byte[0xFFFF]; // 65536
+		long totalBytesRead = 0;
+		int percentCompleted = 0;
 
-		int testCnt = 0;
 		try {
 			// input stream from the HTTP connection
 			while ((bytesRead = stream.read(buffer)) != -1) {
-				testCnt++;
+				totalBytesRead += bytesRead;
+				percentCompleted = (int) (totalBytesRead * 100 / 206498989);
+
+				// [TODO] FOR progress bar test
+				// System.out.println(percentCompleted);
+
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
+
 			fileOutputStream.flush();
-			System.out.println("Number of loops = " + testCnt);
 			flag = true;
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

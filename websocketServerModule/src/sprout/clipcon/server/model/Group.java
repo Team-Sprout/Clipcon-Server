@@ -30,7 +30,8 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out.println("[SERVER] sned message to all users of group except \""+ user + "\" : " + message.toString());
+		System.out
+				.println("[Group] send message to all users of group except \"" + user + "\" : " + message.toString());
 		for (String key : users.keySet()) {
 			if (key.equals(user)) // except
 				continue;
@@ -39,12 +40,12 @@ public class Group {
 	}
 
 	public boolean sendAll(Message message) throws IOException, EncodeException {
-		System.out.println("[SERVER] send message to all user of group: " + message.toString());
-		
-		if(users.size() == 0){
+		System.out.println("[Group] send message to all user of group: " + message.toString());
+
+		if (users.size() == 0) {
 			return true;
 		}
-		
+
 		for (String key : users.keySet()) {
 			users.get(key).getSession().getBasicRemote().sendObject(message);
 		}
@@ -54,7 +55,7 @@ public class Group {
 	public String addUser(String name, UserController session) {
 		String tmpName = getTempUsername();
 		users.put(tmpName, session);
-		System.out.println("[SERVER] new user take part in group: " + primaryKey + ":" + name);
+		System.out.println("[Group] new user take part in group: " + primaryKey + ":" + name);
 		return tmpName;
 	}
 
@@ -99,5 +100,9 @@ public class Group {
 
 	public void removeUser(String userName) {
 		users.remove(userName);
+	}
+
+	public void changeUserName(String userName, String changeUserName) {
+		users.get(userName).setUserName(changeUserName);
 	}
 }

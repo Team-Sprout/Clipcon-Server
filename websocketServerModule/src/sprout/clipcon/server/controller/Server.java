@@ -18,7 +18,7 @@ public class Server {
 
 	// 업로드 파일을 저장할 위치
 	public static final String RECEIVE_LOCATION = "C:\\Users\\Administrator\\Desktop\\"; // TEST PATH 2
-//	public static final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
+	// public static final String RECEIVE_LOCATION = "C:\\Users\\delf\\Desktop\\"; //
 
 	// change source
 	private Server() {
@@ -51,19 +51,18 @@ public class Server {
 	 * @return 생성된 그룹 객체
 	 */
 	public Group createGroup() {
-		// [희정] debug mode for download test
 		String groupKey = generatePrimaryKey(5);
-		// String groupKey = "abcABC";
 		System.out.println("할당된 그룹 키는 " + groupKey);
+
 		Group newGroup = new Group(groupKey);
 		groups.put(groupKey, newGroup);
 		return newGroup;
 	}
 
-	/** 그룹 안의 모든 사용자가 나가면 그룹 목록에서 그룹 삭제 후 dir 삭제*/
+	/** 그룹 안의 모든 사용자가 나가면 그룹 목록에서 그룹 삭제 후 dir 삭제 */
 	public void destroyGroup(String groupPrimaryKey) {
 		groups.remove(groupPrimaryKey);
-		
+
 		deleteAllFilesInGroupDir(RECEIVE_LOCATION + groupPrimaryKey);
 	}
 
@@ -71,8 +70,8 @@ public class Server {
 	public void deleteAllFilesInGroupDir(String parentDirPath) {
 		// Get the files in the folder into an array.
 		File file = new File(parentDirPath);
-		
-		if(file.exists()){
+
+		if (file.exists()) {
 			File[] tempFile = file.listFiles();
 
 			if (tempFile.length > 0) {

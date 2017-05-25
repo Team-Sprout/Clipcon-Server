@@ -1,7 +1,5 @@
 package sprout.clipcon.server.model;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Enumeration;
 
@@ -20,7 +18,7 @@ public class TmpLog {
 
 		/* server request header info */
 		System.out.println("===================HEADER====================");
-		Enumeration headerNames = request.getHeaderNames();
+		Enumeration<String> headerNames = request.getHeaderNames();
 
 		while (headerNames.hasMoreElements()) {
 			String headerName = (String) headerNames.nextElement();
@@ -48,34 +46,25 @@ public class TmpLog {
 
 	/** send response message to client */
 	public static void responseMsgLog(HttpServletResponse response) {
-		PrintWriter writer;
-		try {
-			writer = response.getWriter();
+		response.setContentType("text/html");
+		response.setCharacterEncoding("UTF-8");
 
-			response.setContentType("text/html");
-			response.setCharacterEncoding("UTF-8");
+		System.out.println("Http Post Response: " + response.toString());
 
-			writer.println("Http Post Response: " + response.toString());
+		/* response status info */
+		System.out.println("==================STARTLINE==================");
+		System.out.println("Response Status: " + response.getStatus());
+		System.out.println("Response ContentType: " + response.getContentType());
 
-			/* response status info */
-			writer.println("==================STARTLINE==================");
-			writer.println("Response Status: " + response.getStatus());
-			writer.println("Response ContentType: " + response.getContentType());
+		/* response header info */
+		System.out.println("==================HEADER=====================");
+		Collection<String> headerNames = response.getHeaderNames();
 
-			/* response header info */
-			writer.println("==================HEADER=====================");
-			Collection<String> headerNames = response.getHeaderNames();
+		while (!headerNames.isEmpty()) {
+			String headerName = (String) headerNames.toString();
 
-			while (!headerNames.isEmpty()) {
-				String headerName = (String) headerNames.toString();
-
-				writer.println(headerName + ": " + response.getHeader(headerName));
-			}
-			writer.println("===================ENTITY====================");
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println(headerName + ": " + response.getHeader(headerName));
 		}
+		System.out.println("===================ENTITY====================");
 	}
 }
