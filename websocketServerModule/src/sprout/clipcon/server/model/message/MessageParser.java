@@ -49,19 +49,10 @@ public class MessageParser {
 	}
 
 	public static Message addImageToMessage(Message message, Image image) {
-		image = getResizingImageIcon(image);
 		String test = getBase64StringByImage(image);
 		message.add("imageString", test);
 		System.out.println("image string: " + test);
 		return message;
-	}
-
-	/** Return to reducing Image */
-	private static Image getResizingImageIcon(Image imageData) {
-		// FIXME: When reducing the size of an image, Reduce to image ratio
-		// imageData = imageData.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);
-		// return imageData;
-		return imageData; // Temporarily - transfer the original
 	}
 
 	private static String getBase64StringByImage(Image image) {
@@ -72,7 +63,7 @@ public class MessageParser {
 	private static byte[] getImgBytes(Image image) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			ImageIO.write(toBufferedImage(image), "jpg", baos);
+			ImageIO.write(toBufferedImage(image), "png", baos);
 		} catch (IOException ex) {
 			// handle it here.... not implemented yet...
 		}

@@ -11,6 +11,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import lombok.Getter;
+import lombok.Setter;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageDecoder;
@@ -24,6 +25,8 @@ public class UserController {
 	private Group group; // 참여 중인 그룹
 	// private User user; // user 정보
 	private Session session;
+
+	@Setter
 	private String userName;
 
 	// change source
@@ -35,89 +38,88 @@ public class UserController {
 
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
-		System.out.println("[SERVER] message from client: " + incomingMessage.toString());
+		System.out.println("[UserController] message from client: " + incomingMessage.toString());
 		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
 
 		if (session != userSession) { // for test
 			System.out.println("이런상황이 발생할 수 있을까");
 			return;
-		   }
-		this.session = userSession; // 세션 assign
+		}
+		this.session = userSession; // Session assign
+		System.out.println("[UserController] message received success. type: " + type); // check message type
 
-		System.out.println("[SERVER] message received success. type: " + type); // 메시지 타입 확인
-
-		Message responseMsg = null; // 클라이언트에게 보낼 메시지 초기화
+		Message responseMsg = null; // Initialize message to send to client
 
 		switch (type) {
+		/* Request Type: Create Group */
+		case Message.REQUEST_CREATE_GROUP:
 
-		case Message.REQUEST_CREATE_GROUP: /* 요청 타입: 그룹 생성 */
+			server = Server.getInstance(); // get Server's instance
+			group = server.createGroup(); // get Group in Server and add The instance of group that this object belongs to
+			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX 수정 필요
 
-			server = Server.getInstance(); // "서버"의 instance 추가
-			group = server.createGroup(); // 서버에 그룹을 추가하고 "이 객체가 소속된 그룹"의 instance 추가
-			userName = group.addUser(session.getId(), this); // 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
+			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // create response message: Create Group
+			responseMsg.add(Message.RESULT, Message.CONFIRM); // add response result
+			responseMsg.add(Message.NAME, userName); // add user name
+			MessageParser.addMessageToGroup(responseMsg, group); // add group info
+			break;
 
-			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // 응답 메시지 생성, 응답 타입은 "그룹 생성 요청에 대한 응답"
-			responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
-			responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
-			MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
-
-		break;
-
-		case Message.REQUEST_JOIN_GROUP: /* 요청 타입: 그룹 참가 */
+		/* Request Type: Join Group */
+		case Message.REQUEST_JOIN_GROUP:
 
 			server = Server.getInstance();
-			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
+			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // get the "object corresponding to the requested group key" on the server
 
-			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답"
-			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
-				userName = group.addUser(session.getId(), this); // 그룹에 자신을 추가, 사용자의 이름을 받아옴 / XXX 수정 필요
-				responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
-				responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
-				MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
+			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // create response message: Join Group
 
-				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보"
-				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
+			// 해당 그룹키에 매핑되는 그룹이 존재 시,
+			if (group != null) {
+				userName = group.addUser(session.getId(), this);
+
+				responseMsg.add(Message.RESULT, Message.CONFIRM);
+				responseMsg.add(Message.NAME, userName);
+				MessageParser.addMessageToGroup(responseMsg, group);
+
+				Message noti = new Message().setType(Message.NOTI_ADD_PARTICIPANT); // create notification message: participant's info
+				noti.add(Message.PARTICIPANT_NAME, userName); // add participant's info
 				group.sendWithout(userName, noti);
-
-			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
-				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
 			}
-		break;
+			// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+			else {
+				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
+			}
+			break;
 
-		case Message.REQUEST_EXIT_GROUP: /* 요청 타입: 그룹 나가기 */
+  /* Request Type: Exit Group */
+	case Message.REQUEST_EXIT_GROUP:
+        
 			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
 			exitUserAtGroup();
-			
-//			server = Server.getInstance();
-//			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // 서버에서 "요청한 그룹키에 해당하는 객체"를 가져옴
-//
-//			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP); // 응답 메세지 생성, 응답 타입인 "그룹 참가 요청에 대한 응답"
-//			if (group != null) { // 해당 그룹키에 매핑되는 그룹이 존재 시,
-//				userName = incomingMessage.get(Message.NAME);
-//				group.removeUser(userName); // 그룹에 자신을 삭제
-//
-//				responseMsg.add(Message.RESULT, Message.CONFIRM); // 응답 메시지에 내용 추가: 응답 결과
-//				responseMsg.add(Message.NAME, userName); // 응답 메시지에 내용 추가: 사용자 이름
-//				MessageParser.addMessageToGroup(responseMsg, group); // 응답 메시지에 내용 추가: 그룹 정보
-//
-//				Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "나간 사용자에 대한 정보"
-//				noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
-//				boolean whetherToDestroy = group.sendAll(noti); // 그룹원 모두에게 나간 사용자에 대한 정보 전송
-//				
-//				//그룹을 파기한다.(서버 그룹 목록에서 삭제, 그룹 폴더 및 하위 파일들 삭제)
-//				if(whetherToDestroy == true){
-//					server.destroyGroup(group.getPrimaryKey());
-//				}
-//
-//			} else { // 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
-//				responseMsg.add(Message.RESULT, Message.REJECT); // 응답 메시지에 내용 추가: 응답 결과
-//			}
 		break;
+        
+  /* Request Type: Change Nickname */
+	case Message.REQUEST_CHANGE_NAME:
+
+			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
+
+			String originName = userName; // The user's origin name
+			String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
+
+			group.changeUserName(userName, changeUserName); // Change User Nickname
+
+			responseMsg.add(Message.RESULT, Message.CONFIRM);
+			responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
+
+			Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
+			noti.add(Message.NAME, originName); // add user's origin name
+			noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
+			group.sendWithout(originName, noti);
+			break;
 
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
-		break;
+			break;
 		}
 		sendMessage(session, responseMsg); // 전송
 	}
@@ -127,13 +129,25 @@ public class UserController {
 		if (userSession == null) {
 			System.out.println("Session is null");
 		}
-		System.err.println("[SERVER] Session is closed. User terminated the program.");
+		System.err.println("[UserController] Session is closed. User terminated the program.");
 		exitUserAtGroup();
 	}
-	
-	private void exitUserAtGroup() {
-		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // 알림 메시지 생성, 알림 타입은 "참가자에 대한 정보"
-		noti.add(Message.PARTICIPANT_NAME, userName); // 알림 메시지에 내용 추가: 참가자 정보
+
+	@OnError
+	public void handleError(Throwable t) {
+		System.err.println("[UserController] Error was occured.");
+		t.printStackTrace();
+	}
+
+	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
+		System.out.println("[UserController] message to client: " + message);
+		session.getBasicRemote().sendObject(message);
+	}
+  
+  private void exitUserAtGroup() {
+		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: outgoing user's info
+		noti.add(Message.PARTICIPANT_NAME, userName); // add outgoing user's info
+
 		try {
 			group.sendWithout(userName, noti);
 		} catch (IOException e) {
@@ -146,18 +160,7 @@ public class UserController {
 		if(group.getSize() == 0) {
 			Server.getInstance().removeGroup(group);
 		}
-		System.out.println("[SERVER] User leaves the group.");
-	}
-
-	@OnError
-	public void handleError(Throwable t) {
-		System.err.println("[SERVER] Error was occured.");
-		t.printStackTrace();
-	}
-
-	private void sendMessage(Session session, Message message) throws IOException, EncodeException {
-		System.out.println("[SERVER] meesage to client: " + message);
-		session.getBasicRemote().sendObject(message);
+		System.out.println("[UserController] User leaves the group.");
 	}
 
 	// test main method
