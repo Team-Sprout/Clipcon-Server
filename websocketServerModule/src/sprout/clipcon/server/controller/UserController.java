@@ -1,6 +1,7 @@
 package sprout.clipcon.server.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -90,22 +91,26 @@ public class UserController {
 			}
 			break;
 
-  /* Request Type: Exit Group */
-	case Message.REQUEST_EXIT_GROUP:
-        
+		/* Request Type: Exit Group */
+		case Message.REQUEST_EXIT_GROUP:
+
 			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
 			exitUserAtGroup();
-		break;
-        
-  /* Request Type: Change Nickname */
-	case Message.REQUEST_CHANGE_NAME:
+			break;
+
+		/* Request Type: Change Nickname */
+		case Message.REQUEST_CHANGE_NAME:
 
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
 
 			String originName = userName; // The user's origin name
 			String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
 
+			System.out.println("[Before]userName: " + userName + ", originName: " + originName + ", changeUserName: "
+					+ changeUserName);
 			group.changeUserName(userName, changeUserName); // Change User Nickname
+			System.out.println("[After]userName: " + userName + ", originName: " + originName + ", changeUserName: "
+					+ changeUserName);
 
 			responseMsg.add(Message.RESULT, Message.CONFIRM);
 			responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
@@ -113,7 +118,8 @@ public class UserController {
 			Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
 			noti.add(Message.NAME, originName); // add user's origin name
 			noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
-			group.sendWithout(originName, noti);
+			// group.sendWithout(originName, noti);
+			group.sendWithout(userName, noti);
 			break;
 
 		default:
@@ -122,6 +128,11 @@ public class UserController {
 			break;
 		}
 		sendMessage(session, responseMsg); // 전송
+	}
+
+	private void printUserList(Group group) {
+		List<String> userList = group.getUserList();
+
 	}
 
 	@OnClose
@@ -143,8 +154,8 @@ public class UserController {
 		System.out.println("[UserController] message to client: " + message);
 		session.getBasicRemote().sendObject(message);
 	}
-  
-  private void exitUserAtGroup() {
+
+	private void exitUserAtGroup() {
 		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: outgoing user's info
 		noti.add(Message.PARTICIPANT_NAME, userName); // add outgoing user's info
 
@@ -156,8 +167,8 @@ public class UserController {
 			e.printStackTrace();
 		}
 		group.removeUser(userName);
-		
-		if(group.getSize() == 0) {
+
+		if (group.getSize() == 0) {
 			Server.getInstance().removeGroup(group);
 		}
 		System.out.println("[UserController] User leaves the group.");

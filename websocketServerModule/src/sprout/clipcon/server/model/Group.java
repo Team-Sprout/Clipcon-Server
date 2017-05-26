@@ -103,6 +103,10 @@ public class Group {
 	}
 
 	public void changeUserName(String userName, String changeUserName) {
-		users.get(userName).setUserName(changeUserName);
+		UserController newUserController = users.get(userName); // assign new newUserController
+		newUserController.setUserName(changeUserName); // set changeUserName to newUserController
+
+		removeUser(userName); // delete origin user who request change nickname
+		users.put(changeUserName, newUserController); // add new user that key name is changeUserName
 	}
 }
