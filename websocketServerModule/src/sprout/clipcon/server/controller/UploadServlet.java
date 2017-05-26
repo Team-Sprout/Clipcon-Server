@@ -90,7 +90,6 @@ public class UploadServlet extends HttpServlet {
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
 				uploadContents.setContentsValue(paramValue);
 
-				System.out.println("[for test]group toString: " + group.toString());
 				group.addContents(uploadContents);
 
 				System.out.println("stringData: " + paramValue);
@@ -225,18 +224,10 @@ public class UploadServlet extends HttpServlet {
 
 		int bytesRead = -1;
 		byte[] buffer = new byte[0xFFFF]; // 65536
-		long totalBytesRead = 0;
-		int percentCompleted = 0;
 
 		try {
 			// input stream from the HTTP connection
 			while ((bytesRead = stream.read(buffer)) != -1) {
-				totalBytesRead += bytesRead;
-				percentCompleted = (int) (totalBytesRead * 100 / 206498989);
-
-				// [TODO] FOR progress bar test
-				// System.out.println(percentCompleted);
-
 				fileOutputStream.write(buffer, 0, bytesRead);
 			}
 
