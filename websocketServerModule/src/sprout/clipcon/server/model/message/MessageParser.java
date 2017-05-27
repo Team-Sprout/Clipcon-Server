@@ -30,7 +30,6 @@ public class MessageParser {
 		}
 		message.add(Message.LIST, array);
 		return message;
-
 	}
 
 	public static Message appendMessageByGroup(Message message, Group group) {

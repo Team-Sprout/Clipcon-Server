@@ -3,13 +3,17 @@ package sprout.clipcon.server.controller;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -23,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.websocket.EncodeException;
 
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
@@ -33,6 +39,7 @@ import sprout.clipcon.server.model.message.MessageParser;
  * maxRequestSize:  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
+@NoArgsConstructor
 public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3432460337698180662L;
@@ -47,25 +54,28 @@ public class UploadServlet extends HttpServlet {
 	private String uploadTime = null;
 	private boolean flag = false;
 
-	/** Constructor UploadServlet */
-	public UploadServlet() {
-	}
+	// [hee] Upload Time For Log
+	@Setter
+	public static long uploadStartTime = 0;
+	private long uploadEndTime = 0;
+	@Setter
+	public static String multipleContentsInfo = "";
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoPost START");
 
-		Date sd = new Date();
-		long len = request.getContentLengthLong();
-		System.out.print("req len = " + len + " kb (");
-		System.out.println((float) len / (1024 * 1024) + " mb)");
-
+		long contentsLength = request.getContentLengthLong();
+		String contentsType = null;
+		String deviceType = request.getHeader("User-Agent");
 		request.setCharacterEncoding("UTF-8");
 
 		userName = request.getParameter("userName");
@@ -75,16 +85,15 @@ public class UploadServlet extends HttpServlet {
 				+ "\n *uploadTime: " + uploadTime);
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
-
 		Contents uploadContents = null;
 
 		// Notification message generation, notification type "Data upload"
 		Message uploadNoti = new Message().setType(Message.NOTI_UPLOAD_DATA);
 
 		for (Part part : request.getParts()) {
-			String partName = part.getName();
+			contentsType = part.getName();
 
-			switch (partName) {
+			switch (contentsType) {
 			case "stringData":
 				String paramValue = getStringFromStream(part.getInputStream());
 				uploadContents = new Contents(Contents.TYPE_STRING, userName, uploadTime, part.getSize());
@@ -99,7 +108,8 @@ public class UploadServlet extends HttpServlet {
 				uploadContents = new Contents(Contents.TYPE_IMAGE, userName, uploadTime, part.getSize());
 				group.addContents(uploadContents);
 
-				Image imageData = getImageDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
+				Image imageData = getImageDataStream(part.getInputStream(), groupPK,
+						uploadContents.getContentsPKName());
 				MessageParser.addImageToMessage(uploadNoti, imageData);
 
 				System.out.println("imageData: " + imageData.toString());
@@ -131,6 +141,9 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
 			}
 		}
+		uploadEndTime = System.currentTimeMillis();
+		logUploadTime(deviceType, contentsLength, contentsType);
+
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
 		try {
@@ -139,13 +152,7 @@ public class UploadServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		System.out.println();
-
 		System.out.println("End of servlet");
-		Date ed = new Date();
-		float t = (float) (ed.getTime() - sd.getTime()) / 1000;
-		System.out.println("Time = " + t + "sec");
-		System.out.print("Speed = " + (float) len / t + " kb/s (");
-		System.out.println((float) len / t / (1024 * 1024) + " mb/s)");
 		// responseMsgLog(response);
 	}
 
@@ -215,7 +222,6 @@ public class UploadServlet extends HttpServlet {
 	/** The stream that receives the File Data and make real file */
 	// 가 아니라 파일화 하는 역할
 	public void getFileDataStream(InputStream stream, String groupPK, String fileName) throws IOException {
-		Date start = new Date();
 		String saveFilePath = RECEIVE_LOCATION + groupPK; // Save to a folder in the group to which the user belongs
 		String saveFileFullPath = saveFilePath + File.separator + fileName;
 
@@ -244,8 +250,6 @@ public class UploadServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 		}
-		Date end = new Date();
-		System.out.println("Time: " + (end.getTime() - start.getTime()));
 	}
 
 	/** Extract filename from Request Header "content-disposition" */
@@ -263,12 +267,10 @@ public class UploadServlet extends HttpServlet {
 	/**
 	 * Create a directory
 	 * 
-	 * @param directoryName
-	 *            The name of the directory you want to create
+	 * @param directoryName - The name of the directory you want to create
 	 */
 	private void createDirectory(String directoryName) {
 		File receiveFolder = new File(directoryName);
-		System.out.println("directoryName: " + directoryName);
 
 		if (!receiveFolder.exists()) {
 			receiveFolder.mkdir(); // Create Directory
@@ -282,5 +284,52 @@ public class UploadServlet extends HttpServlet {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 
 		return sdf.format(date).toString();
+	}
+
+	/** [hee] Upload Time For Log */
+	public void logUploadTime(String deviceType, long contentsLength, String contentsType) {
+		InetAddress local;
+		String logdata;
+
+		float contentLengthToKB = ((float) contentsLength / 1024);
+		float time = (float) (uploadEndTime - uploadStartTime) / 1000;
+		float speed = contentLengthToKB / time;
+
+		try {
+			local = InetAddress.getLocalHost();
+
+			FileWriter fw = new FileWriter(Server.SERVER_ROOT_LOCATION + "logUploadInfoData.txt", true);
+			BufferedWriter bw = new BufferedWriter(fw);
+
+			logdata = groupPK + ", ";
+			logdata += userName + ", ";
+			logdata += this.uploadTime() + ", ";
+			logdata += local.getHostAddress() + ", ";
+			logdata += local.getHostName() + ", ";
+			logdata += uploadStartTime + ", ";
+			logdata += uploadEndTime + ", ";
+			if (!deviceType.equals("pcProgram")) {
+				deviceType = "androidProgram";
+			}
+			logdata += deviceType + ", ";
+			logdata += contentsLength + ", ";
+			logdata += contentsType + ", ";
+			logdata += multipleContentsInfo;
+
+			System.out.println("\n[LOG] ");
+			/* contents uploadTime */
+			System.out.println("Time = " + time + "sec");
+			System.out.print("Speed = " + speed + " kb/s (" + speed / 1024 + " mb/s)\n");
+
+			bw.write(logdata);
+			bw.newLine();
+			bw.flush();
+			bw.close();
+
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.err.println(e); // 에러가 있다면 메시지 출력
+		}
 	}
 }

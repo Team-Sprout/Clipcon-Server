@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 
@@ -20,6 +21,7 @@ import sprout.clipcon.server.model.Group;
  * Servlet implementation class DownloadServlet
  */
 @WebServlet("/DownloadServlet")
+@NoArgsConstructor
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -35,11 +37,6 @@ public class DownloadServlet extends HttpServlet {
 	private String userName = null;
 	private String groupPK = null;
 	private String downloadDataPK = null;
-
-	/** Constructor UploadServlet */
-	public DownloadServlet() {
-		super();
-	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
