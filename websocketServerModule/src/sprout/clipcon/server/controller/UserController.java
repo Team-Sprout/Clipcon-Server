@@ -1,7 +1,6 @@
 package sprout.clipcon.server.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
@@ -54,7 +53,6 @@ public class UserController {
 		switch (type) {
 		/* Request Type: Create Group */
 		case Message.REQUEST_CREATE_GROUP:
-
 			server = Server.getInstance(); // get Server's instance
 			group = server.createGroup(); // get Group in Server and add The instance of group that this object belongs to
 			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX 수정 필요
@@ -67,7 +65,6 @@ public class UserController {
 
 		/* Request Type: Join Group */
 		case Message.REQUEST_JOIN_GROUP:
-
 			server = Server.getInstance();
 			group = server.getGroupByPrimaryKey(incomingMessage.get(Message.GROUP_PK)); // get the "object corresponding to the requested group key" on the server
 
@@ -93,24 +90,18 @@ public class UserController {
 
 		/* Request Type: Exit Group */
 		case Message.REQUEST_EXIT_GROUP:
-
 			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
 			exitUserAtGroup();
 			break;
 
 		/* Request Type: Change Nickname */
 		case Message.REQUEST_CHANGE_NAME:
-
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
 
 			String originName = userName; // The user's origin name
 			String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
 
-			System.out.println("[Before]userName: " + userName + ", originName: " + originName + ", changeUserName: "
-					+ changeUserName);
 			group.changeUserName(userName, changeUserName); // Change User Nickname
-			System.out.println("[After]userName: " + userName + ", originName: " + originName + ", changeUserName: "
-					+ changeUserName);
 
 			responseMsg.add(Message.RESULT, Message.CONFIRM);
 			responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
@@ -122,17 +113,23 @@ public class UserController {
 			group.sendWithout(userName, noti);
 			break;
 
+		/* Request Type: Receive Upload Info For Log */
+		case Message.LOG_UPLOAD_INFO:
+			responseMsg = new Message().setType(Message.RESPONSE_UPLOAD_INFO);
+			UploadServlet.uploadStartTime = Long.parseLong(incomingMessage.get(Message.UPLOAD_START_TIME)); // Upload Start Time
+			String multipleContentsInfo = incomingMessage.get(Message.MULTIPLE_CONTENTS_INFO);
+
+			if (multipleContentsInfo != null) {
+				UploadServlet.multipleContentsInfo = multipleContentsInfo; // Multiple contents detail info
+			}
+			break;
+
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
 			break;
 		}
 		sendMessage(session, responseMsg); // 전송
-	}
-
-	private void printUserList(Group group) {
-		List<String> userList = group.getUserList();
-
 	}
 
 	@OnClose
