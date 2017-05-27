@@ -16,8 +16,8 @@ public class Server {
 	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
-	 public static final String SERVER_ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
-//	 public static final String SERVER_ROOT_LOCATION = "C:\\Users\\delf\\Desktop\\";
+	 // public static final String SERVER_ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
+	public static final String SERVER_ROOT_LOCATION = "C:\\Users\\delf\\Desktop\\";
 	
 	// 업로드 파일을 저장할 위치
 	 public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download\\"; 

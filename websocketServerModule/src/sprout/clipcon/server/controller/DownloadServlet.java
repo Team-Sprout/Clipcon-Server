@@ -35,6 +35,7 @@ public class DownloadServlet extends HttpServlet {
 	private String charset = "UTF-8";
 
 	private String userName = null;
+	
 	private String groupPK = null;
 	private String downloadDataPK = null;
 

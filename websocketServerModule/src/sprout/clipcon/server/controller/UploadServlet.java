@@ -155,7 +155,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("End of servlet");
 		// responseMsgLog(response);
 	}
-
+	
 	/** The stream that receives the String data */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
@@ -297,7 +297,7 @@ public class UploadServlet extends HttpServlet {
 
 		try {
 			local = InetAddress.getLocalHost();
-
+			// File logFile = new File(S)
 			FileWriter fw = new FileWriter(Server.SERVER_ROOT_LOCATION + "logUploadInfoData.txt", true);
 			BufferedWriter bw = new BufferedWriter(fw);
 
