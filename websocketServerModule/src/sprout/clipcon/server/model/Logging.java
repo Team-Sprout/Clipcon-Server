@@ -6,7 +6,7 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class TmpLog {
+public class Logging {
 	/** Print request Msg */
 	public static void requestMsgLog(HttpServletRequest request) {
 

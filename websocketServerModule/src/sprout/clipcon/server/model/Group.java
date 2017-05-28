@@ -102,6 +102,9 @@ public class Group {
 		users.remove(userName);
 	}
 
+	/** change user name
+	 * @param userName - user's origin name
+	 * @param changeUserName - the name that user want to change */
 	public void changeUserName(String userName, String changeUserName) {
 		UserController newUserController = users.get(userName); // assign new newUserController
 		newUserController.setUserName(changeUserName); // set changeUserName to newUserController
