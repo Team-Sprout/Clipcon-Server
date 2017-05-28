@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
+import sprout.clipcon.server.model.Evaluation;
 import sprout.clipcon.server.model.Group;
 
 /**
@@ -59,6 +60,8 @@ public class DownloadServlet extends HttpServlet {
 		
 		Contents contents = group.getContents(downloadDataPK);
 		String contentsType = contents.getContentsType();
+		
+		Evaluation.downloadStartTime = System.currentTimeMillis();
 
 		switch (contentsType) {
 		case Contents.TYPE_STRING:

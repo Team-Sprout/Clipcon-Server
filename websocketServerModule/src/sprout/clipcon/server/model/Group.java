@@ -30,8 +30,7 @@ public class Group {
 	}
 
 	public void sendWithout(String user, Message message) throws IOException, EncodeException {
-		System.out
-				.println("[Group] send message to all users of group except \"" + user + "\" : " + message.toString());
+		System.out.println("[Group] send message to all users of group except \"" + user + "\" : " + message.toString());
 		for (String key : users.keySet()) {
 			if (key.equals(user)) // except
 				continue;
@@ -55,7 +54,7 @@ public class Group {
 	public String addUser(String name, UserController session) {
 		String tmpName = getTempUsername();
 		users.put(tmpName, session);
-		System.out.println("[Group] new user take part in group: " + primaryKey + ":" + name);
+		System.out.println("[Group] new user take part in group: " + primaryKey + ":" + tmpName);
 		return tmpName;
 	}
 
@@ -102,11 +101,18 @@ public class Group {
 		users.remove(userName);
 	}
 
+	/** change user name
+	 * @param userName - user's origin name
+	 * @param changeUserName - the name that user want to change */
 	public void changeUserName(String userName, String changeUserName) {
-		UserController newUserController = users.get(userName); // assign new newUserController
-		newUserController.setUserName(changeUserName); // set changeUserName to newUserController
 
-		removeUser(userName); // delete origin user who request change nickname
-		users.put(changeUserName, newUserController); // add new user that key name is changeUserName
+		// // 아래 희정이코드
+		// UserController newUserController = users.get(userName); // assign new newUserController
+		// newUserController.setUserName(changeUserName); // set changeUserName to newUserController
+		//
+		// removeUser(userName); // delete origin user who request change nickname
+		// users.put(changeUserName, newUserController); // add new user that key name is changeUserName
+		// 여기까지 희정 코드
+
 	}
 }

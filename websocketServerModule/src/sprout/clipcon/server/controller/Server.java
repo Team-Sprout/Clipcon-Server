@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import sprout.clipcon.server.model.Group;
 
@@ -41,6 +43,14 @@ public class Server {
 	 * @return 그룹의 존재 여부. 그룹이 존재하면 true, 그렇지 않으면 false
 	 */
 	public Group getGroupByPrimaryKey(String key) {
+		
+		Set set = groups.keySet();
+		Iterator<String> it = set.iterator();
+		while(it.hasNext()) {
+			System.out.print(it.next() + ", ");
+		}
+		System.out.println();
+		
 		Group targetGroup = groups.get(key);
 		if (targetGroup != null) {
 		}
@@ -91,18 +101,7 @@ public class Server {
 	}
 	
 	public void removeGroup(Group group) {
-		System.out.println("[hotfix]------------------------------- removeGroup(Group group):Server.java");
-		// groups.remove(group);
-		if(group == null) {
-			System.out.println("group is null");
-		}
-		else {
-			System.out.println("group key is " + group.getPrimaryKey());
-		}
 		Group removeGroup = groups.remove(group.getPrimaryKey());
-		if(removeGroup == null) {
-			System.out.println("removeGroup is null");
-		}
 		deleteAllFilesInGroupDir(removeGroup.getPrimaryKey());
 	}
 
