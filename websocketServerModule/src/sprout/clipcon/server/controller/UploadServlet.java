@@ -3,17 +3,13 @@ package sprout.clipcon.server.controller;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -28,8 +24,8 @@ import javax.servlet.http.Part;
 import javax.websocket.EncodeException;
 
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import sprout.clipcon.server.model.Contents;
+import sprout.clipcon.server.model.Evaluation;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
@@ -53,13 +49,6 @@ public class UploadServlet extends HttpServlet {
 	private String groupPK = null;
 	private String uploadTime = null;
 	private boolean flag = false;
-
-	// [hee] Upload Time For Log
-	@Setter
-	public static long uploadStartTime = 0;
-	private long uploadEndTime = 0;
-	@Setter
-	public static String multipleContentsInfo = "";
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -141,8 +130,8 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
 			}
 		}
-		uploadEndTime = System.currentTimeMillis();
-		logUploadTime(deviceType, contentsLength, contentsType);
+		Evaluation.uploadEndTime = System.currentTimeMillis();
+		Evaluation.createEvaluationFile("UPLOAD", groupPK, userName, deviceType, contentsLength, contentsType);
 
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 
@@ -267,7 +256,8 @@ public class UploadServlet extends HttpServlet {
 	/**
 	 * Create a directory
 	 * 
-	 * @param directoryName - The name of the directory you want to create
+	 * @param directoryName
+	 *            - The name of the directory you want to create
 	 */
 	private void createDirectory(String directoryName) {
 		File receiveFolder = new File(directoryName);
@@ -279,57 +269,10 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	/** @return Current Time YYYY-MM-DD HH:MM:SS */
-	public String uploadTime() {
+	public static String uploadTime() {
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 
 		return sdf.format(date).toString();
-	}
-
-	/** [hee] Upload Time For Log */
-	public void logUploadTime(String deviceType, long contentsLength, String contentsType) {
-		InetAddress local;
-		String logdata;
-
-		float contentLengthToKB = ((float) contentsLength / 1024);
-		float time = (float) (uploadEndTime - uploadStartTime) / 1000;
-		float speed = contentLengthToKB / time;
-
-		try {
-			local = InetAddress.getLocalHost();
-
-			FileWriter fw = new FileWriter(Server.SERVER_ROOT_LOCATION + "logUploadInfoData.txt", true);
-			BufferedWriter bw = new BufferedWriter(fw);
-
-			logdata = groupPK + ", ";
-			logdata += userName + ", ";
-			logdata += this.uploadTime() + ", ";
-			logdata += local.getHostAddress() + ", ";
-			logdata += local.getHostName() + ", ";
-			logdata += uploadStartTime + ", ";
-			logdata += uploadEndTime + ", ";
-			if (!deviceType.equals("pcProgram")) {
-				deviceType = "androidProgram";
-			}
-			logdata += deviceType + ", ";
-			logdata += contentsLength + ", ";
-			logdata += contentsType + ", ";
-			logdata += multipleContentsInfo;
-
-			System.out.println("\n[LOG] ");
-			/* contents uploadTime */
-			System.out.println("Time = " + time + "sec");
-			System.out.print("Speed = " + speed + " kb/s (" + speed / 1024 + " mb/s)\n");
-
-			bw.write(logdata);
-			bw.newLine();
-			bw.flush();
-			bw.close();
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.err.println(e); // 에러가 있다면 메시지 출력
-		}
 	}
 }
