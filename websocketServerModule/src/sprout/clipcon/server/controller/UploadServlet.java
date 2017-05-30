@@ -29,7 +29,6 @@ import javax.websocket.EncodeException;
 
 import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
-import sprout.clipcon.server.model.Evaluation;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
@@ -66,9 +65,7 @@ public class UploadServlet extends HttpServlet {
 		// requestMsgLog(request);
 		System.out.println("================================================================\ndoPost START");
 
-		long contentsLength = request.getContentLengthLong();
 		String contentsType = null;
-		String deviceType = request.getHeader("User-Agent");
 		request.setCharacterEncoding("UTF-8");
 
 		userName = request.getParameter("userName");
@@ -137,8 +134,6 @@ public class UploadServlet extends HttpServlet {
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
 			}
 		}
-		Evaluation.uploadEndTime = System.currentTimeMillis();
-		Evaluation.createEvaluationFile("UPLOAD", groupPK, userName, deviceType, contentsLength, contentsType);
 
 		MessageParser.addContentsToMessage(uploadNoti, uploadContents);
 

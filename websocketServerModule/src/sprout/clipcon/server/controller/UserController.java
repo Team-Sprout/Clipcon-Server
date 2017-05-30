@@ -12,7 +12,6 @@ import javax.websocket.server.ServerEndpoint;
 
 import lombok.Getter;
 import lombok.Setter;
-import sprout.clipcon.server.model.Evaluation;
 import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageDecoder;
@@ -122,28 +121,6 @@ public class UserController {
 			// group.sendWithout(userName, noti);
 			// // 여기까지 희정이 코드
 
-			break;
-
-		/* Request Type: Receive Upload Info For Log */
-		case Message.LOG_UPLOAD_INFO:
-			responseMsg = new Message().setType(Message.RESPONSE_UPLOAD_INFO);
-
-			Evaluation.uploadStartTime = Long.parseLong(incomingMessage.get(Message.UPLOAD_START_TIME)); // Upload Start Time
-			Evaluation.multipleContentsInfo = incomingMessage.get(Message.MULTIPLE_CONTENTS_INFO); // Multiple contents detail info
-			break;
-
-		/* Request Type: Receive Download Info For Log */
-		case Message.LOG_DOWNLOAD_INFO:
-			responseMsg = new Message().setType(Message.RESPONSE_UPLOAD_INFO);
-
-			String deviceType = incomingMessage.get(Message.DOWNLOAD_DEVICETYPE);
-			long contentsLength = Long.parseLong(incomingMessage.get(Message.DOWNLOAD_CONTENTS_LENGTH));
-			String contentsType = incomingMessage.get(Message.DOWNLOAD_CONTENTS_TYPE);
-
-			Evaluation.downloadEndTimeBeforeCompress = Long.parseLong(incomingMessage.get(Message.DOWNLOAD_END_TIME_BEFORE_COMPRESS)); // Download End Time Before Compress
-			Evaluation.downloadEndTimeAfterCompress = Long.parseLong(incomingMessage.get(Message.DOWNLOAD_END_TIME_AFTER_COMPRESS)); // Download End Time After Compress
-			Evaluation.multipleContentsInfo = incomingMessage.get(Message.MULTIPLE_CONTENTS_INFO); // Multiple contents detail info
-			Evaluation.createEvaluationFile("DOWNLOAD", group.getPrimaryKey(), userName, deviceType, contentsLength, contentsType);
 			break;
 
 		default:
