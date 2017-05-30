@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
-import sprout.clipcon.server.model.Evaluation;
 import sprout.clipcon.server.model.Group;
 
 /**
@@ -31,7 +30,6 @@ public class DownloadServlet extends HttpServlet {
 	// root location where group folder exists
 	private final String ROOT_LOCATION = Server.RECEIVE_LOCATION;
 
-	private static final int CHUNKSIZE = 4096;
 	private static final String LINE_FEED = "\r\n";
 	private String charset = "UTF-8";
 
@@ -54,21 +52,16 @@ public class DownloadServlet extends HttpServlet {
 		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: "
 				+ downloadDataPK + "\n");
 
-		
 		Group group = server.getGroupByPrimaryKey(groupPK);
-		
+
 		Contents contents = group.getContents(downloadDataPK);
 		String contentsType = contents.getContentsType();
-		
-		Evaluation.downloadStartTime = System.currentTimeMillis();
 
 		switch (contentsType) {
 		case Contents.TYPE_STRING:
 			String stringData = contents.getContentsValue();
-			long stringSize = 0;
 
 			response.setContentType("text/plain; charset=UTF-8");
-			response.setHeader("Content-Length", stringSize + LINE_FEED);
 			response.setHeader("Content-Disposition", "form-data; name=stringData" + "\"" + LINE_FEED);
 
 			sendStringData(stringData, response.getOutputStream());
@@ -76,10 +69,8 @@ public class DownloadServlet extends HttpServlet {
 
 		case Contents.TYPE_IMAGE:
 			String imageFileName = contents.getContentsPKName();
-			long imageSize = contents.getContentsSize();
 
 			response.setContentType("image/png");
-			response.setHeader("Content-Length", imageSize + LINE_FEED);
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
 			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 			// Transfer the image file data in the directory. (ByteArrayStream)
@@ -88,18 +79,16 @@ public class DownloadServlet extends HttpServlet {
 
 		case Contents.TYPE_FILE:
 			String fileName = contents.getContentsPKName();
-			long fileSize = contents.getContentsSize();
 
-			setHeaderForSendingFile(fileName, fileSize, response);
+			setHeaderForSendingFile(fileName, response);
 			// Transfer the file data in the directory. (FileStream)
 			sendFileData(fileName, response.getOutputStream());
 			break;
 
 		case Contents.TYPE_MULTIPLE_FILE:
 			String multipleFileName = contents.getContentsPKName();
-			long multipleFileSize = contents.getContentsSize();
 
-			setHeaderForSendingFile(multipleFileName, multipleFileSize, response);
+			setHeaderForSendingFile(multipleFileName, response);
 			// Transfer the zip(multiple) file data in the directory. (FileStream)
 			sendFileData(multipleFileName, response.getOutputStream());
 			break;
@@ -119,9 +108,8 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	/** Setting Header Info For Sending File and Multiple File */
-	public void setHeaderForSendingFile(String fileName, long fileSize, HttpServletResponse response) {
+	public void setHeaderForSendingFile(String fileName, HttpServletResponse response) {
 		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Length", fileSize + LINE_FEED);
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
 		response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 	}
@@ -129,7 +117,7 @@ public class DownloadServlet extends HttpServlet {
 	/** Send String Data */
 	public void sendStringData(String stringData, OutputStream outputStream) {
 		try {
-
+			System.out.println("[DownloadServlet] String Data Content: " + stringData);
 			PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
 
 			writer.append(stringData).append(LINE_FEED);
@@ -137,6 +125,7 @@ public class DownloadServlet extends HttpServlet {
 			writer.close();
 
 			outputStream.close();
+			System.out.println("[DownloadServlet] Close");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -149,7 +138,8 @@ public class DownloadServlet extends HttpServlet {
 
 		try {
 			FileInputStream inputStream = new FileInputStream(sendFileContents);
-			byte[] buffer = new byte[CHUNKSIZE];
+			
+			byte[] buffer = new byte[0xFFFF];
 			int bytesRead = -1;
 			System.out.println("[DEBUG] delf: byte size: " + buffer.length);
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
