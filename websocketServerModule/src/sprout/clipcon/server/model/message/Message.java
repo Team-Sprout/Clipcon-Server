@@ -79,8 +79,6 @@ public class Message {
 	public final static String RESPONSE_JOIN_GROUP = "response/join group";
 	public final static String RESPONSE_EXIT_GROUP = "response/exit group";
 	public final static String RESPONSE_CHANGE_NAME = "response/change name";
-	public final static String RESPONSE_UPLOAD_INFO = "response/upload info";	
-	public final static String RESPONSE_DOWNLOAD_INFO = "response/download info";
 	public final static String NOTI_ADD_PARTICIPANT = "noti/add participant";
 	public final static String NOTI_EXIT_PARTICIPANT = "noti/exit participant";
 	public final static String NOTI_UPLOAD_DATA = "noti/upload data";
@@ -105,14 +103,4 @@ public class Message {
 	public final static String TEST_DEBUG_MODE = "debug";
 
 	public final static String PARTICIPANT_NAME = "participant name";
-	
-	public final static String LOG_UPLOAD_INFO = "log/upload info";
-	public final static String UPLOAD_START_TIME = "upload start time";
-	public final static String LOG_DOWNLOAD_INFO = "log/download info";
-	public final static String DOWNLOAD_END_TIME_BEFORE_COMPRESS = "download end time before compress";
-	public final static String DOWNLOAD_END_TIME_AFTER_COMPRESS = "download end time after compress";
-	public final static String DOWNLOAD_DEVICETYPE = "download device type";
-	public final static String DOWNLOAD_CONTENTS_LENGTH = "download contents length";
-	public final static String DOWNLOAD_CONTENTS_TYPE = "download contents type";
-	public final static String MULTIPLE_CONTENTS_INFO = "multiple contents info";
 }
