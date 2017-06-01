@@ -107,7 +107,7 @@ public class UserController {
 			
 			//// 아래 희정이 코드
 			// String originName = userName; // The user's origin name
-			// String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
+			// String changeUserName = incomingMessage.getn(Message.CHANGE_NAME); // The user's new name
 			//
 			// group.changeUserName(userName, changeUserName); // Change User Nickname
 			//
