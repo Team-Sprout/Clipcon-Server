@@ -116,20 +116,30 @@ public class Server {
 	private String generatePrimaryKey(int length) {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
-		for (int i = 0; i < length; i++) {
-			int rIndex = rnd.nextInt(2) + 1;
-			switch (rIndex) {
-			// case 0:
-			// temp.append((char) ((int) (rnd.nextInt(26)) + 65));
-			// bre;
-			case 1:
-				temp.append((char) ((int) (rnd.nextInt(26)) + 97));
-				break;
-			case 2:
-				temp.append((rnd.nextInt(10)));
-				break;
-			}
+//		for (int i = 0; i < length; i++) {
+//			int rIndex = rnd.nextInt(2) + 1; // 1 또는 2인 랜덤 정수
+//			switch (rIndex) {
+//			// case 0:
+//			// temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+//			// bre;
+//			case 1:
+//				temp.append((char) ((int) (rnd.nextInt(26)) + 97)); //소문자 알파벳
+//				break;
+//			case 2:
+//				temp.append((rnd.nextInt(10))); //0~9 사이의 랜덤 정수
+//				break;
+//			}
+//		}
+//
+//		int rindex = rnd.nextInt(length) + 1; // 1~length 사이의 랜덤 정수
+
+		for (int i = 0; i < 2; i++) {
+			temp.append((char) ((int) (rnd.nextInt(26)) + 97)); // 소문자 알파벳
 		}
+		for (int i = 0; i < length - 2; i++) {
+			temp.append((rnd.nextInt(10))); // 0~9 사이의 랜덤 정수
+		}
+
 		return temp.toString();
 	}
 
