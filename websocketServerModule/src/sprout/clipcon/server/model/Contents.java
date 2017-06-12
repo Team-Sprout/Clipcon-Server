@@ -6,8 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
-@ToString
+//@Setter
 @NoArgsConstructor
 public class Contents {
 	public final static String TYPE_STRING = "STRING";
@@ -17,11 +16,13 @@ public class Contents {
 
 	private String contentsType;
 	private long contentsSize;
+	@Setter
 	private String contentsPKName;
 	private String uploadUserName;
 	private String uploadTime;
 
 	// String Type: String object value, (single) File Type: FileOriginName
+	@Setter
 	private String contentsValue = "";
 
 	private int primaryKey = 0;

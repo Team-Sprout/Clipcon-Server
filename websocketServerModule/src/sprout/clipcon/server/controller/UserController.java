@@ -18,12 +18,12 @@ import sprout.clipcon.server.model.message.MessageDecoder;
 import sprout.clipcon.server.model.message.MessageEncoder;
 import sprout.clipcon.server.model.message.MessageParser;
 
-@Getter
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { MessageEncoder.class }, decoders = { MessageDecoder.class })
 public class UserController {
 	private Server server; // 서버
 	private Group group; // 참여 중인 그룹
 	// private User user; // user 정보
+	@Getter
 	private Session session;
 
 	@Setter
