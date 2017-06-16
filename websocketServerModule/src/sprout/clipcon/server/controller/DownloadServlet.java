@@ -36,7 +36,7 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("================================================================\ndoGet START");
+		System.out.println("=================================================== aaa=============\ndoGet START");
 
 		// get Request Data
 		String userName = request.getParameter("userName");

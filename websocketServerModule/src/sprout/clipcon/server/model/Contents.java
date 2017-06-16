@@ -20,6 +20,7 @@ public class Contents {
 	private String contentsPKName;
 	private String uploadUserName;
 	private String uploadTime;
+	private String multipleFileListInfo; // 도연 추가
 
 	// String Type: String object value, (single) File Type: FileOriginName
 	@Setter
@@ -33,4 +34,10 @@ public class Contents {
 		this.uploadTime = time;
 		this.contentsSize = size;
 	}
+	
+	// 도연 추가
+		public Contents(String type, String userName, String time, long size, String multipleFileListInfo) {
+			this(type, userName, time, size);
+			this.multipleFileListInfo = multipleFileListInfo;
+		}
 }

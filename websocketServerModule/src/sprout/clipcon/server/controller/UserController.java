@@ -26,8 +26,7 @@ public class UserController {
 	@Getter
 	private Session session;
 
-	@Setter
-	private String userName;
+	@Setter private String userName;
 
 	// change source
 	@OnOpen
@@ -97,20 +96,31 @@ public class UserController {
 		/* Request Type: Change Nickname */
 		case Message.REQUEST_CHANGE_NAME:
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
-
-			String originName = userName; // The user's origin name
-			String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
-
-			group.changeUserName(userName, changeUserName); // Change User Nickname
-
 			responseMsg.add(Message.RESULT, Message.CONFIRM);
-			responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
-
+			String originName = userName;
+			userName = incomingMessage.get(Message.CHANGE_NAME);
+			responseMsg.add(Message.CHANGE_NAME, userName);
 			Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
 			noti.add(Message.NAME, originName); // add user's origin name
-			noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
-			// group.sendWithout(originName, noti);
-			group.sendWithout(userName, noti);
+			noti.add(Message.CHANGE_NAME, userName); // add user's new name
+			group.sendAll(noti);
+			
+			//// 아래 희정이 코드
+			// String originName = userName; // The user's origin name
+			// String changeUserName = incomingMessage.getn(Message.CHANGE_NAME); // The user's new name
+			//
+			// group.changeUserName(userName, changeUserName); // Change User Nickname
+			//
+			// responseMsg.add(Message.RESULT, Message.CONFIRM);
+			// responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
+			//
+			// Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
+			// noti.add(Message.NAME, originName); // add user's origin name
+			// noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
+			// // group.sendWithout(originName, noti);
+			// group.sendWithout(userName, noti);
+			// // 여기까지 희정이 코드
+
 			break;
 
 		default:
