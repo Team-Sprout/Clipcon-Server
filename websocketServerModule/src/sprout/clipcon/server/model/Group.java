@@ -16,10 +16,8 @@ import lombok.Setter;
 import sprout.clipcon.server.controller.UserController;
 import sprout.clipcon.server.model.message.Message;
 
-@Getter
-@Setter
-@NoArgsConstructor
 public class Group {
+	@Getter
 	private String primaryKey;
 	private Map<String, UserController> users = Collections.synchronizedMap(new HashMap<String, UserController>());
 	private History history;

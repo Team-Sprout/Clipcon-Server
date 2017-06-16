@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class History {
-	@Getter
-	@Setter
 	private String groupPK;
 	private Map<String, Contents> contentsMap;
 
