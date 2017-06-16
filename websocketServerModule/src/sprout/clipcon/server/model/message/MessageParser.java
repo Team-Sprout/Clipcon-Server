@@ -43,6 +43,7 @@ public class MessageParser {
 		message.add("uploadUserName", contents.getUploadUserName()); // name
 		message.add("uploadTime", contents.getUploadTime()); // time
 		message.add("contentsValue", contents.getContentsValue());
+		message.add("multipleFileListInfo", contents.getMultipleFileListInfo());
 
 		return message;
 	}

@@ -3,13 +3,17 @@ package sprout.clipcon.server.controller;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -47,6 +51,7 @@ public class UploadServlet extends HttpServlet {
 	private String userName = null;
 	private String groupPK = null;
 	private String uploadTime = null;
+	private String multipleFileListInfo = null; // 도연 추가
 	private boolean flag = false;
 
 	@Override
@@ -71,6 +76,9 @@ public class UploadServlet extends HttpServlet {
 				+ "\n *uploadTime: " + uploadTime);
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
+		if(group == null) {
+			System.out.println("[DEBUG] group is null");
+		}
 		Contents uploadContents = null;
 
 		// Notification message generation, notification type "Data upload"
@@ -114,14 +122,18 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
+				
+				multipleFileListInfo = request.getParameter("multipleFileListInfo"); // 도연 추가
 
-				uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize());
+				uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize(), multipleFileListInfo); // 도연 추가
 				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				break;
+				
+				
 
 			default:
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
@@ -139,7 +151,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("End of servlet");
 		// responseMsgLog(response);
 	}
-
+	
 	/** The stream that receives the String data */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));

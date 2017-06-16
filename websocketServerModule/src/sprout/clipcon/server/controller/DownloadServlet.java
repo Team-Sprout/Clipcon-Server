@@ -34,6 +34,7 @@ public class DownloadServlet extends HttpServlet {
 	private String charset = "UTF-8";
 
 	private String userName = null;
+	
 	private String groupPK = null;
 	private String downloadDataPK = null;
 
@@ -42,7 +43,7 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("================================================================\ndoGet START");
+		System.out.println("=================================================== aaa=============\ndoGet START");
 
 		// get Request Data
 		userName = request.getParameter("userName");
