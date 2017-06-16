@@ -34,20 +34,12 @@ import sprout.clipcon.server.model.message.MessageParser;
  * maxRequestSize:  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
-@NoArgsConstructor
 public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3432460337698180662L;
-
-	private Server server = Server.getInstance();
-
 	// root location where to save the upload file
 	private final String RECEIVE_LOCATION = Server.RECEIVE_LOCATION;
-
-	private String userName = null;
-	private String groupPK = null;
-	private String uploadTime = null;
-	private boolean flag = false;
+	private Server server = Server.getInstance();
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,9 +56,9 @@ public class UploadServlet extends HttpServlet {
 		String contentsType = null;
 		request.setCharacterEncoding("UTF-8");
 
-		userName = request.getParameter("userName");
-		groupPK = request.getParameter("groupPK");
-		uploadTime = uploadTime(); // Time that server get request msg
+		String userName = request.getParameter("userName");
+		String groupPK = request.getParameter("groupPK");
+		String uploadTime = uploadTime(); // Time that server get request msg
 		System.out.println("[SERVER] == Parameter info == \n **userName: " + userName + "\n *groupPK: " + groupPK
 				+ "\n *uploadTime: " + uploadTime);
 
@@ -222,7 +214,6 @@ public class UploadServlet extends HttpServlet {
 			}
 
 			fileOutputStream.flush();
-			flag = true;
 
 		} catch (Exception e) {
 			e.printStackTrace();
