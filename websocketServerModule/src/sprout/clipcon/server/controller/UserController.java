@@ -120,9 +120,7 @@ public class UserController {
 			// // group.sendWithout(originName, noti);
 			// group.sendWithout(userName, noti);
 			// // 여기까지 희정이 코드
-
 			break;
-
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
@@ -163,7 +161,12 @@ public class UserController {
 			e.printStackTrace();
 		}
 		group.removeUser(userName);
-
+		try {
+			session.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (group.getSize() == 0) {
 			Server.getInstance().removeGroup(group);
 		}

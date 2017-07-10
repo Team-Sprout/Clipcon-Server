@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 
@@ -36,7 +35,8 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("=================================================== aaa=============\ndoGet START");
+		System.out.println("=================================================== aaa=============\n"
+				+ "doGet START");
 
 		// get Request Data
 		String userName = request.getParameter("userName");
