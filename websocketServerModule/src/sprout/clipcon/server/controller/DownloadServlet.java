@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import lombok.NoArgsConstructor;
 import sprout.clipcon.server.model.Contents;
 import sprout.clipcon.server.model.Group;
 
@@ -146,7 +145,6 @@ public class DownloadServlet extends HttpServlet {
 			int bytesRead = -1;
 
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				System.out.println("[sendFileData] bytesRead size: " + bytesRead);
 				outputStream.write(buffer, 0, bytesRead);
 			}
 			outputStream.flush();
