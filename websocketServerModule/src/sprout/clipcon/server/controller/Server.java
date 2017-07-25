@@ -18,14 +18,20 @@ public class Server {
 	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
-	 // public static final String SERVER_ROOT_LOCATION = "C:\\Users\\Administrator\\Desktop\\";
-	public static final String SERVER_ROOT_LOCATION = "C:\\Users\\delf\\Desktop\\";
-	
+	public static final String SERVER_ROOT_LOCATION = System.getProperty("user.home") + File.separator + "Desktop"+ File.separator;
+
 	// 업로드 파일을 저장할 위치
-	 public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download\\"; 
+	public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download";
 
 	// change source
 	private Server() {
+		System.out.println("Construct Server >>>");
+
+		File initReceiveLocation = new File(RECEIVE_LOCATION);
+
+		if (!initReceiveLocation.exists()) {
+			initReceiveLocation.mkdir(); // Create Directory
+		}
 	}
 
 	public static Server getInstance() {
@@ -43,14 +49,14 @@ public class Server {
 	 * @return 그룹의 존재 여부. 그룹이 존재하면 true, 그렇지 않으면 false
 	 */
 	public Group getGroupByPrimaryKey(String key) {
-		
+
 		Set set = groups.keySet();
 		Iterator<String> it = set.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			System.out.print(it.next() + ", ");
 		}
 		System.out.println();
-		
+
 		Group targetGroup = groups.get(key);
 		if (targetGroup != null) {
 		}
@@ -75,7 +81,7 @@ public class Server {
 	public void destroyGroup(String groupPrimaryKey) {
 		groups.remove(groupPrimaryKey);
 
-		deleteAllFilesInGroupDir(RECEIVE_LOCATION + groupPrimaryKey);
+		deleteAllFilesInGroupDir(RECEIVE_LOCATION + File.separator + groupPrimaryKey);
 	}
 
 	/** Delete all files in group directory */
@@ -99,7 +105,7 @@ public class Server {
 			}
 		}
 	}
-	
+
 	public void removeGroup(Group group) {
 		Group removeGroup = groups.remove(group.getPrimaryKey());
 		deleteAllFilesInGroupDir(removeGroup.getPrimaryKey());
@@ -115,22 +121,22 @@ public class Server {
 	private String generatePrimaryKey(int length) {
 		StringBuffer temp = new StringBuffer();
 		Random rnd = new Random();
-//		for (int i = 0; i < length; i++) {
-//			int rIndex = rnd.nextInt(2) + 1; // 1 또는 2인 랜덤 정수
-//			switch (rIndex) {
-//			// case 0:
-//			// temp.append((char) ((int) (rnd.nextInt(26)) + 65));
-//			// bre;
-//			case 1:
-//				temp.append((char) ((int) (rnd.nextInt(26)) + 97)); //소문자 알파벳
-//				break;
-//			case 2:
-//				temp.append((rnd.nextInt(10))); //0~9 사이의 랜덤 정수
-//				break;
-//			}
-//		}
-//
-//		int rindex = rnd.nextInt(length) + 1; // 1~length 사이의 랜덤 정수
+		// for (int i = 0; i < length; i++) {
+		// int rIndex = rnd.nextInt(2) + 1; // 1 또는 2인 랜덤 정수
+		// switch (rIndex) {
+		// // case 0:
+		// // temp.append((char) ((int) (rnd.nextInt(26)) + 65));
+		// // bre;
+		// case 1:
+		// temp.append((char) ((int) (rnd.nextInt(26)) + 97)); //소문자 알파벳
+		// break;
+		// case 2:
+		// temp.append((rnd.nextInt(10))); //0~9 사이의 랜덤 정수
+		// break;
+		// }
+		// }
+		//
+		// int rindex = rnd.nextInt(length) + 1; // 1~length 사이의 랜덤 정수
 
 		for (int i = 0; i < 2; i++) {
 			temp.append((char) ((int) (rnd.nextInt(26)) + 97)); // 소문자 알파벳

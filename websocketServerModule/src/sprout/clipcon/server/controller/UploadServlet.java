@@ -33,18 +33,18 @@ import sprout.clipcon.server.model.Group;
 import sprout.clipcon.server.model.message.Message;
 import sprout.clipcon.server.model.message.MessageParser;
 
-/* maxFileSize: Max File Size(100MB)
+/* maxFileSize: Max File Size(500MB)
  * fileSizeThreshold: Files less than 1MB used directly in memory
- * maxRequestSize:  */
+ * maxRequestSize: Max Request Size(500MB) */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 500, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 500)
 @WebServlet("/UploadServlet")
 public class UploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3432460337698180662L;
 	// root location where to save the upload file
-	private final String RECEIVE_LOCATION = Server.RECEIVE_LOCATION;
+	private final String RECEIVE_LOCATION = Server.RECEIVE_LOCATION + File.separator;
 
-  private Server server = Server.getInstance();
+	private Server server = Server.getInstance();
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -64,13 +64,13 @@ public class UploadServlet extends HttpServlet {
 		String userName = request.getParameter("userName");
 		String groupPK = request.getParameter("groupPK");
 		String uploadTime = uploadTime(); // Time that server get request msg
-    String multipleFileListInfo = null; // 도연 추가
-    
+		String multipleFileListInfo = null; 
+
 		System.out.println("[SERVER] == Parameter info == \n **userName: " + userName + "\n *groupPK: " + groupPK
 				+ "\n *uploadTime: " + uploadTime);
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
-		if(group == null) {
+		if (group == null) {
 			System.out.println("[DEBUG] group is null");
 		}
 		Contents uploadContents = null;
@@ -116,18 +116,16 @@ public class UploadServlet extends HttpServlet {
 				break;
 			case "multipartFileData":
 				createDirectory(RECEIVE_LOCATION + groupPK); // Create Directory to save uploaded file.
-				
-				multipleFileListInfo = request.getParameter("multipleFileListInfo"); // 도연 추가
 
-				uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize(), multipleFileListInfo); // 도연 추가
+				multipleFileListInfo = request.getParameter("multipleFileListInfo");
+
+				uploadContents = new Contents(Contents.TYPE_MULTIPLE_FILE, userName, uploadTime, part.getSize(), multipleFileListInfo); 
 				uploadContents.setContentsValue(getFilenameInHeader(part.getHeader("Content-Disposition"))); // save fileName
 
 				group.addContents(uploadContents);
 				// Save the actual File (filename: unique key) in the groupPK folder
 				getFileDataStream(part.getInputStream(), groupPK, uploadContents.getContentsPKName());
 				break;
-				
-				
 
 			default:
 				System.out.println("<<UPLOAD SERVLET>> It does not belong to any format.");
@@ -145,7 +143,7 @@ public class UploadServlet extends HttpServlet {
 		System.out.println("End of servlet");
 		// responseMsgLog(response);
 	}
-	
+
 	/** The stream that receives the String data */
 	public String getStringFromStream(InputStream stream) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
