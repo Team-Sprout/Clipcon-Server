@@ -20,16 +20,20 @@ public class Server {
 	/** All groups on the server */
 	private Map<String, Group> groups = Collections.synchronizedMap(new HashMap<String, Group>());
 
-	// public static final String SERVER_ROOT_LOCATION =
-	// "C:\\Users\\Administrator\\Desktop\\";
-	public static final String SERVER_ROOT_LOCATION = "C:\\Users\\delf\\Desktop\\";
+	public static final String SERVER_ROOT_LOCATION = System.getProperty("user.home") + File.separator + "Desktop"+ File.separator;
 
 	// 업로드 파일을 저장할 위치
-	public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download\\";
+	public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download";
 
 	// change source
 	private Server() {
-		new ServerStatusCheck().start();
+		System.out.println("Construct Server >>>");
+
+		File initReceiveLocation = new File(RECEIVE_LOCATION);
+
+		if (!initReceiveLocation.exists()) {
+			initReceiveLocation.mkdir(); // Create Directory
+		}
 	}
 
 	public static Server getInstance() {
@@ -79,7 +83,7 @@ public class Server {
 	public void destroyGroup(String groupPrimaryKey) {
 		groups.remove(groupPrimaryKey);
 
-		deleteAllFilesInGroupDir(RECEIVE_LOCATION + groupPrimaryKey);
+		deleteAllFilesInGroupDir(RECEIVE_LOCATION + File.separator + groupPrimaryKey);
 	}
 
 	/** Delete all files in group directory */

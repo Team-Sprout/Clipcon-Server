@@ -21,13 +21,13 @@ import sprout.clipcon.server.model.Group;
  */
 @WebServlet("/DownloadServlet")
 public class DownloadServlet extends HttpServlet {
-	
+
 	private static final long serialVersionUID = 1L;
 	// root location where group folder exists
-	private final String ROOT_LOCATION = Server.RECEIVE_LOCATION;
+	private final String ROOT_LOCATION = Server.RECEIVE_LOCATION + File.separator;
 	private final String LINE_FEED = "\r\n";
 	private final String charset = "UTF-8";
-	
+
 	private Server server = Server.getInstance();
 
 	/**
@@ -35,16 +35,14 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("=================================================== aaa=============\n"
-				+ "doGet START");
+		System.out.println("===================================================================\ndoGet START");
 
 		// get Request Data
 		String userName = request.getParameter("userName");
 		String groupPK = request.getParameter("groupPK");
 		String downloadDataPK = request.getParameter("downloadDataPK");
 
-		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: "
-				+ downloadDataPK + "\n");
+		System.out.println("<<Parameter>>\n userName: " + userName + ", groupPK: " + groupPK + ", downloadDataPK: " + downloadDataPK + "\n");
 
 		Group group = server.getGroupByPrimaryKey(groupPK);
 
@@ -64,27 +62,40 @@ public class DownloadServlet extends HttpServlet {
 		case Contents.TYPE_IMAGE:
 			String imageFileName = contents.getContentsPKName();
 
-			response.setContentType("image/png");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + imageFileName + LINE_FEED);
-			response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
+			setHeaderForSendingFile("image/png", imageFileName, response);
+
+			// Get file data to send to client
+			File sendImageFileContents = new File(ROOT_LOCATION + groupPK + File.separator + imageFileName);
+			response.setContentLengthLong(sendImageFileContents.length());
+
 			// Transfer the image file data in the directory. (ByteArrayStream)
-			sendFileData(imageFileName, groupPK, response.getOutputStream());
+			sendFileData(sendImageFileContents, groupPK, response.getOutputStream());
 			break;
 
 		case Contents.TYPE_FILE:
 			String fileName = contents.getContentsPKName();
 
-			setHeaderForSendingFile(fileName, response);
+			setHeaderForSendingFile("application/octet-stream", fileName, response);
+
+			// Get file data to send to client
+			File sendFileContents = new File(ROOT_LOCATION + groupPK + File.separator + fileName);
+			response.setContentLengthLong(sendFileContents.length());
+
 			// Transfer the file data in the directory. (FileStream)
-			sendFileData(fileName, groupPK, response.getOutputStream());
+			sendFileData(sendFileContents, groupPK, response.getOutputStream());
 			break;
 
 		case Contents.TYPE_MULTIPLE_FILE:
 			String multipleFileName = contents.getContentsPKName();
 
-			setHeaderForSendingFile(multipleFileName, response);
+			setHeaderForSendingFile("application/octet-stream", multipleFileName, response);
+
+			// Get file data to send to client
+			File sendMultipleFileContents = new File(ROOT_LOCATION + groupPK + File.separator + multipleFileName);
+			response.setContentLengthLong(sendMultipleFileContents.length());
+
 			// Transfer the zip(multiple) file data in the directory. (FileStream)
-			sendFileData(multipleFileName, groupPK, response.getOutputStream());
+			sendFileData(sendMultipleFileContents, groupPK, response.getOutputStream());
 			break;
 
 		default:
@@ -102,8 +113,8 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	/** Setting Header Info For Sending File and Multiple File */
-	public void setHeaderForSendingFile(String fileName, HttpServletResponse response) {
-		response.setContentType("application/octet-stream");
+	public void setHeaderForSendingFile(String contentType, String fileName, HttpServletResponse response) {
+		response.setContentType(contentType);
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + LINE_FEED);
 		response.setHeader("Content-Transfer-Encoding", "binary" + "\"" + LINE_FEED);
 	}
@@ -126,17 +137,15 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	/** Send Captured Image Data, File Data and Multiple Data */
-	public void sendFileData(String fileName, String groupPK, OutputStream outputStream) {
-		// Get file data to send to client
-		File sendFileContents = new File(ROOT_LOCATION + groupPK + File.separator + fileName);
-
+	public void sendFileData(File sendFileContents, String groupPK, OutputStream outputStream) {
 		try {
 			FileInputStream inputStream = new FileInputStream(sendFileContents);
-			
+
 			byte[] buffer = new byte[0xFFFF];
 			int bytesRead = -1;
-			System.out.println("[DEBUG] delf: byte size: " + buffer.length);
+
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				System.out.println("[sendFileData] bytesRead size: " + bytesRead);
 				outputStream.write(buffer, 0, bytesRead);
 			}
 			outputStream.flush();
