@@ -51,7 +51,6 @@ public class MessageParser {
 	public static Message addImageToMessage(Message message, Image image) {
 		String test = getBase64StringByImage(image);
 		message.add("imageString", test);
-		System.out.println("image string: " + test);
 		return message;
 	}
 

@@ -145,7 +145,6 @@ public class DownloadServlet extends HttpServlet {
 			int bytesRead = -1;
 
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
-				System.out.println("[sendFileData] bytesRead size: " + bytesRead);
 				outputStream.write(buffer, 0, bytesRead);
 			}
 			outputStream.flush();

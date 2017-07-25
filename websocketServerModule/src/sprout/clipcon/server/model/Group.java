@@ -37,8 +37,6 @@ public class Group {
 	}
 
 	public boolean sendAll(Message message) throws IOException, EncodeException {
-		System.out.println("[Group] send message to all user of group: " + message.toString());
-
 		if (users.size() == 0) {
 			return true;
 		}
