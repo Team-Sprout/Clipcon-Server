@@ -92,7 +92,7 @@ public class UserController {
 			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
 			exitUserAtGroup();
 			break;
-
+			
 		/* Request Type: Change Nickname */
 		case Message.REQUEST_CHANGE_NAME:
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
@@ -121,12 +121,28 @@ public class UserController {
 			// group.sendWithout(userName, noti);
 			// // 여기까지 희정이 코드
 			break;
+			
+		case Message.REQUEST_EXIT_PROGRAM:
+			System.out.println("[INFO] user exit the program");
+			responseMsg = new Message().setType(Message.RESPONSE_EXIT_GROUP);
+			exitUserAtGroup();
+			
+			try {
+				session.close();
+				session = null;
+			} catch (IOException e) {
+				System.err.println("[ERR] session close");
+			}
+			
+			break;
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("예외사항");
 			break;
 		}
-		sendMessage(session, responseMsg); // 전송
+		if(session != null) {
+			sendMessage(session, responseMsg); // 전송
+		}
 	}
 
 	@OnClose
@@ -135,6 +151,7 @@ public class UserController {
 			System.out.println("Session is null");
 		}
 		System.err.println("[UserController] Session is closed. User terminated the program.");
+		session = null;
 		exitUserAtGroup();
 	}
 
@@ -150,27 +167,32 @@ public class UserController {
 	}
 
 	private void exitUserAtGroup() {
-		Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: outgoing user's info
-		noti.add(Message.PARTICIPANT_NAME, userName); // add outgoing user's info
-
-		try {
-			group.sendWithout(userName, noti);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (EncodeException e) {
-			e.printStackTrace();
+		if(group != null) {
+			Message noti = new Message().setType(Message.NOTI_EXIT_PARTICIPANT); // create notification message: outgoing user's info
+			noti.add(Message.PARTICIPANT_NAME, userName); // add outgoing user's info
+			if(userName == null) {
+				System.out.println("userName is null");
+			}
+			if(group == null) {
+				System.out.println("group is null");
+			}
+			
+			try {
+				group.sendWithout(userName, noti);
+			} catch (IOException e) {
+				System.err.println("[ERR] I/O exception. sending message");
+				// e.printStackTrace();
+			} catch (EncodeException e) {
+				System.err.println("[ERR] Encode exception. sending message");
+				// e.printStackTrace();
+			}
+			group.removeUser(userName);
+			
+			if (group.getSize() == 0) {
+				Server.getInstance().removeGroup(group);
+			}
+			System.out.println("[UserController] User leaves the group.");
 		}
-		group.removeUser(userName);
-		try {
-			session.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (group.getSize() == 0) {
-			Server.getInstance().removeGroup(group);
-		}
-		System.out.println("[UserController] User leaves the group.");
 	}
 
 	// test main method
