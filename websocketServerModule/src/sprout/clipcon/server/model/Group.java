@@ -101,14 +101,10 @@ public class Group {
 	 * @param userName - user's origin name
 	 * @param changeUserName - the name that user want to change */
 	public void changeUserName(String userName, String changeUserName) {
-
-		// // 아래 희정이코드
-		// UserController newUserController = users.get(userName); // assign new newUserController
-		// newUserController.setUserName(changeUserName); // set changeUserName to newUserController
-		//
-		// removeUser(userName); // delete origin user who request change nickname
-		// users.put(changeUserName, newUserController); // add new user that key name is changeUserName
-		// 여기까지 희정 코드
-
+		 UserController newUserController = users.get(userName); // assign new newUserController
+		 newUserController.setUserName(changeUserName); // set changeUserName to newUserController
+		
+		 removeUser(userName); // delete origin user who request change nickname
+		 users.put(changeUserName, newUserController); // add new user that key name is changeUserName
 	}
 }

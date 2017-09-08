@@ -20,9 +20,9 @@ import sprout.clipcon.server.model.message.MessageParser;
 
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { MessageEncoder.class }, decoders = { MessageDecoder.class })
 public class UserController {
-	private Server server; // 서버
-	private Group group; // 참여 중인 그룹
-	// private User user; // user 정보
+	private Server server; // �꽌踰�
+	private Group group; // 李몄뿬 以묒씤 洹몃９
+	// private User user; // user �젙蹂�
 	@Getter
 	private Session session;
 
@@ -38,10 +38,10 @@ public class UserController {
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
 		System.out.println("[UserController] message from client: " + incomingMessage.toString());
-		String type = incomingMessage.getType(); // 받은 메시지의 타입 추출
+		String type = incomingMessage.getType(); // 諛쏆� 硫붿떆吏��쓽 ���엯 異붿텧
 
 		if (session != userSession) { // for test
-			System.out.println("이런상황이 발생할 수 있을까");
+			System.out.println("�씠�윴�긽�솴�씠 諛쒖깮�븷 �닔 �엳�쓣源�");
 			return;
 		}
 		this.session = userSession; // Session assign
@@ -54,7 +54,7 @@ public class UserController {
 		case Message.REQUEST_CREATE_GROUP:
 			server = Server.getInstance(); // get Server's instance
 			group = server.createGroup(); // get Group in Server and add The instance of group that this object belongs to
-			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX 수정 필요
+			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX �닔�젙 �븘�슂
 
 			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // create response message: Create Group
 			responseMsg.add(Message.RESULT, Message.CONFIRM); // add response result
@@ -69,7 +69,7 @@ public class UserController {
 
 			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // create response message: Join Group
 
-			// 해당 그룹키에 매핑되는 그룹이 존재 시,
+			// �빐�떦 洹몃９�궎�뿉 留ㅽ븨�릺�뒗 洹몃９�씠 議댁옱 �떆,
 			if (group != null) {
 				userName = group.addUser(session.getId(), this);
 
@@ -81,7 +81,7 @@ public class UserController {
 				noti.add(Message.PARTICIPANT_NAME, userName); // add participant's info
 				group.sendWithout(userName, noti);
 			}
-			// 해당 그룹키에 매핑되는 그룹이 존재하지 않을 시,
+			// �빐�떦 洹몃９�궎�뿉 留ㅽ븨�릺�뒗 洹몃９�씠 議댁옱�븯吏� �븡�쓣 �떆,
 			else {
 				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
 			}
@@ -96,30 +96,24 @@ public class UserController {
 		/* Request Type: Change Nickname */
 		case Message.REQUEST_CHANGE_NAME:
 			responseMsg = new Message().setType(Message.RESPONSE_CHANGE_NAME); // create response message: Change Nickname
+
+			String originName = userName; // The user's origin name
+			String changeUserName = incomingMessage.get(Message.CHANGE_NAME); // The user's new name
+			 
+			System.out.println("originName: " + originName + ", changeUserName: " + changeUserName);
+			
+			group.changeUserName(userName, changeUserName); // Change User Nickname
+			
 			responseMsg.add(Message.RESULT, Message.CONFIRM);
-			String originName = userName;
-			userName = incomingMessage.get(Message.CHANGE_NAME);
-			responseMsg.add(Message.CHANGE_NAME, userName);
+			responseMsg.add(Message.CHANGE_NAME, changeUserName); // add new nickname
+			
 			Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
 			noti.add(Message.NAME, originName); // add user's origin name
-			noti.add(Message.CHANGE_NAME, userName); // add user's new name
-			group.sendAll(noti);
-			
-			//// 아래 희정이 코드
-			// String originName = userName; // The user's origin name
-			// String changeUserName = incomingMessage.getn(Message.CHANGE_NAME); // The user's new name
-			//
-			// group.changeUserName(userName, changeUserName); // Change User Nickname
-			//
-			// responseMsg.add(Message.RESULT, Message.CONFIRM);
-			// responseMsg.add(Message.CHANGE_NAME, userName); // add new nickname
-			//
-			// Message noti = new Message().setType(Message.NOTI_CHANGE_NAME); // create notification message: user's info who request changing name
-			// noti.add(Message.NAME, originName); // add user's origin name
-			// noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
-			// // group.sendWithout(originName, noti);
-			// group.sendWithout(userName, noti);
-			// // 여기까지 희정이 코드
+			noti.add(Message.CHANGE_NAME, changeUserName); // add user's new name
+			 
+			System.out.println("originName: " + originName + ", changeUserName: " + changeUserName);
+			 // group.sendWithout(originName, noti);
+			group.sendWithout(userName, noti);
 			break;
 			
 		case Message.REQUEST_EXIT_PROGRAM:
@@ -137,11 +131,11 @@ public class UserController {
 			break;
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
-			System.out.println("예외사항");
+			System.out.println("�삁�쇅�궗�빆");
 			break;
 		}
 		if(session != null) {
-			sendMessage(session, responseMsg); // 전송
+			sendMessage(session, responseMsg); // �쟾�넚
 		}
 	}
 
@@ -201,7 +195,7 @@ public class UserController {
 		try {
 			new UserController().handleMessage(tmpMessage, null);
 		} catch (Exception e) {
-			System.out.println("예외 무시");
+			System.out.println("�삁�쇅 臾댁떆");
 			e.printStackTrace();
 		}
 	}
