@@ -69,12 +69,14 @@ public class Message {
 
 	public final static String TYPE = "message type";
 
+	public final static String REQUEST_CONFIRM_VERSION = "request/confirm version";
 	public final static String REQUEST_CREATE_GROUP = "request/create group";
 	public final static String REQUEST_JOIN_GROUP = "request/join group";
 	public final static String REQUEST_EXIT_GROUP = "request/exit group";
 	public final static String REQUEST_CHANGE_NAME = "request/change name";
 	public final static String REQUEST_TEST = "request/test";
 
+	public final static String RESPONSE_CONFIRM_VERSION = "response/confirm version";
 	public final static String REQUEST_EXIT_PROGRAM = "request/exit program";
 	public final static String RESPONSE_CREATE_GROUP = "response/create group";
 	public final static String RESPONSE_JOIN_GROUP = "response/join group";
@@ -84,6 +86,8 @@ public class Message {
 	public final static String NOTI_EXIT_PARTICIPANT = "noti/exit participant";
 	public final static String NOTI_UPLOAD_DATA = "noti/upload data";
 	public final static String NOTI_CHANGE_NAME = "noti/change name";
+	
+	public final static String CLIPCON_VERSION = "clipcon version";
 
 	public final static String RESULT = "result";
 	public final static String CONFIRM = "confirm";
