@@ -20,9 +20,9 @@ import sprout.clipcon.server.model.message.MessageParser;
 
 @ServerEndpoint(value = "/ServerEndpoint", encoders = { MessageEncoder.class }, decoders = { MessageDecoder.class })
 public class UserController {
-	private Server server; // �꽌踰�
-	private Group group; // 李몄뿬 以묒씤 洹몃９
-	// private User user; // user �젙蹂�
+	private Server server; // server
+	private Group group; // Participating group 
+	// private User user; // user information
 	@Getter
 	private Session session;
 
@@ -38,10 +38,9 @@ public class UserController {
 	@OnMessage
 	public void handleMessage(Message incomingMessage, Session userSession) throws IOException, EncodeException {
 		System.out.println("[UserController] message from client: " + incomingMessage.toString());
-		String type = incomingMessage.getType(); // 諛쏆� 硫붿떆吏��쓽 ���엯 異붿텧
+		String type = incomingMessage.getType(); //  extract type of received message
 
 		if (session != userSession) { // for test
-			System.out.println("�씠�윴�긽�솴�씠 諛쒖깮�븷 �닔 �엳�쓣源�");
 			return;
 		}
 		this.session = userSession; // Session assign
@@ -54,7 +53,7 @@ public class UserController {
 		case Message.REQUEST_CREATE_GROUP:
 			server = Server.getInstance(); // get Server's instance
 			group = server.createGroup(); // get Group in Server and add The instance of group that this object belongs to
-			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX �닔�젙 �븘�슂
+			userName = group.addUser(session.getId(), this); // add yourself to the group, get the user's name / XXX need to fix
 
 			responseMsg = new Message().setType(Message.RESPONSE_CREATE_GROUP); // create response message: Create Group
 			responseMsg.add(Message.RESULT, Message.CONFIRM); // add response result
@@ -69,7 +68,7 @@ public class UserController {
 
 			responseMsg = new Message().setType(Message.RESPONSE_JOIN_GROUP); // create response message: Join Group
 
-			// �빐�떦 洹몃９�궎�뿉 留ㅽ븨�릺�뒗 洹몃９�씠 議댁옱 �떆,
+			// If there is a group mapped to this group key
 			if (group != null) {
 				userName = group.addUser(session.getId(), this);
 
@@ -81,7 +80,7 @@ public class UserController {
 				noti.add(Message.PARTICIPANT_NAME, userName); // add participant's info
 				group.sendWithout(userName, noti);
 			}
-			// �빐�떦 洹몃９�궎�뿉 留ㅽ븨�릺�뒗 洹몃９�씠 議댁옱�븯吏� �븡�쓣 �떆,
+			// If there isn't a group mapped to this group key
 			else {
 				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
 			}
@@ -131,11 +130,11 @@ public class UserController {
 			break;
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
-			System.out.println("�삁�쇅�궗�빆");
+			System.out.println("Exception");
 			break;
 		}
 		if(session != null) {
-			sendMessage(session, responseMsg); // �쟾�넚
+			sendMessage(session, responseMsg);
 		}
 	}
 
@@ -195,7 +194,6 @@ public class UserController {
 		try {
 			new UserController().handleMessage(tmpMessage, null);
 		} catch (Exception e) {
-			System.out.println("�삁�쇅 臾댁떆");
 			e.printStackTrace();
 		}
 	}
