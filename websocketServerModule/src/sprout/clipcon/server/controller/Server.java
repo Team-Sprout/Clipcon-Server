@@ -24,7 +24,10 @@ public class Server {
 
 	// 업로드 파일을 저장할 위치
 	public static final String RECEIVE_LOCATION = SERVER_ROOT_LOCATION + "clipcon_download";
-
+	
+	public static final String LATEST_WINDOWS_CLIENT_VERSION = "1.1";
+	public static final String LATEST_ADNROID_CLIENT_VERSION = "1.1";
+	
 	// change source
 	private Server() {
 		System.out.println("Construct Server >>>");
@@ -44,7 +47,7 @@ public class Server {
 	}
 
 	/**
-	 * 해당 그룹에 사용자 추가
+	 * 해당 그룹에 사용자 추가 
 	 * 
 	 * @param key
 	 *            그룹 고유 키
