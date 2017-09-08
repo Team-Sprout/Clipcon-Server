@@ -18,7 +18,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>2.6</version>
 				<configuration>
 					<warSourceDirectory>WebContent</warSourceDirectory>
 				</configuration>
@@ -46,10 +46,10 @@
 			<artifactId>cos</artifactId>
 			<version>05Nov2002</version>
 		</dependency>
-		
-		
+
+
 	</dependencies>
-	
-	
+
+
 
 </project>
