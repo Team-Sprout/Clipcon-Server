@@ -32,7 +32,9 @@ public class UserController {
 	@OnOpen
 	public void handleOpen(Session userSession) {
 		this.session = userSession;
-		System.out.println("session is opened");
+		System.out.print("session open");
+		System.out.print("(" + UploadServlet.uploadTime() + ")");
+	
 	}
 
 	@OnMessage
@@ -80,7 +82,6 @@ public class UserController {
 				noti.add(Message.PARTICIPANT_NAME, userName); // add participant's info
 				group.sendWithout(userName, noti);
 			}
-			// If there isn't a group mapped to this group key
 			else {
 				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
 			}
@@ -128,6 +129,12 @@ public class UserController {
 			}
 			
 			break;
+			
+		case Message.PING:
+				System.out.println("ping");
+				responseMsg = new Message().setType(Message.PONG);
+			break;
+			
 		default:
 			responseMsg = new Message().setType(Message.TEST_DEBUG_MODE);
 			System.out.println("Exception");
@@ -146,12 +153,15 @@ public class UserController {
 		System.err.println("[UserController] Session is closed. User terminated the program.");
 		session = null;
 		exitUserAtGroup();
+		System.out.println("[handleClose] " + UploadServlet.uploadTime());
+		// System.out.println("session open: " + session.isOpen());
+
 	}
 
 	@OnError
 	public void handleError(Throwable t) {
 		System.err.println("[UserController] Error was occured.");
-		t.printStackTrace();
+		// t.printStackTrace();
 	}
 
 	private void sendMessage(Session session, Message message) throws IOException, EncodeException {

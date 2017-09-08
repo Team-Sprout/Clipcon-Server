@@ -104,4 +104,7 @@ public class Message {
 	public final static String TEST_DEBUG_MODE = "debug";
 
 	public final static String PARTICIPANT_NAME = "participant name";
+	
+	public final static String PING = "ping";
+	public final static String PONG = "pong";
 }
