@@ -51,6 +51,19 @@ public class UserController {
 		Message responseMsg = null; // Initialize message to send to client
 
 		switch (type) {
+		/* Request Type: Confirm Version */
+		case Message.REQUEST_CONFIRM_VERSION:
+			String versionFromClient = incomingMessage.get(Message.CLIPCON_VERSION);
+			
+			responseMsg = new Message().setType(Message.RESPONSE_CONFIRM_VERSION); // create response message: Confirm Version
+			
+			if(versionFromClient.equals(Server.LATEST_WINDOWS_CLIENT_VERSION))
+				responseMsg.add(Message.RESULT, Message.CONFIRM); // add response result
+			else
+				responseMsg.add(Message.RESULT, Message.REJECT); // add response result
+			
+			break;
+			
 		/* Request Type: Create Group */
 		case Message.REQUEST_CREATE_GROUP:
 			server = Server.getInstance(); // get Server's instance
