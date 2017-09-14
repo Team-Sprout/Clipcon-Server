@@ -79,3 +79,6 @@ hs_err_pid*
 
 # documentation
 doc
+
+#  excution file
+*.exe
