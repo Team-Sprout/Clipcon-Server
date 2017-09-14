@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -20,7 +21,7 @@ import javax.servlet.http.Part;
  * Servlet implementation class DownloadServlet
  */
 @MultipartConfig(maxFileSize = 1024 * 1024 * 10, fileSizeThreshold = 1024 * 1024, maxRequestSize = 1024 * 1024 * 10)
-@WebServlet("/BugReportServlet")
+@WebServlet("/bugreport")
 public class BugReportServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
@@ -29,11 +30,19 @@ public class BugReportServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		
+		String page = "/bugreport2.jsp";
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher(page);
+		dispatcher.forward(request, response);
+		
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+
 		/* Gets the bug message entered by the client */
 		Part part = request.getPart("bugMessage");
 		InputStream is = part.getInputStream();
@@ -80,5 +89,6 @@ public class BugReportServlet extends HttpServlet {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+		response.sendRedirect("/globalclipboard");
 	}
 }
