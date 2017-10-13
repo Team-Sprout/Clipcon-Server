@@ -6,11 +6,13 @@ Global Clipboard는 다수의 사용자가 클립보드를 이용하여 데이�
 
 자세한 내용은 [Wiki](https://github.com/Team-Sprout/Clipcon-Server.wiki) 참조.
 
-
 ## ClipCon
 ClipCon은 Global Clipboard에서 동작하는 클라이언트 어플리케이션의 이름입니다. 현재 본 프로젝트에서는 윈도우와 안드로이드에서 구동되는 어플리케이션을 개발하였습니다. ClipCon에 대한 자세한 내용은 다음을 참고하여 주시기 바랍니다.
-* 윈도우: [Windows ClipCon GitHub](https://github.com/team-sprout/clipcon-client)>
+* 윈도우: [Windows ClipCon GitHub](https://github.com/team-sprout/clipcon-client)
 * 안드로이드: [Android ClipCon GitHub](https://github.com/team-sprout/clipcon-AndroidClient)
+
+# 구조
+**Global Clipboard** Server는 Apache Tomcat을 이용하여 웹 서버를 구축하여 사용자가 업로드한 데이터를 저장하고 요청한 데이터를 전송합니다. 또한 서버의 상태를 먼저 알려주기 위하여 Websocket을 이용한 push기능을 구현하였습니다. 개발에는 Tomcat 8.0 버전을 이용하여 개발하였고 현재 Windows 기반의 PC에서 임시 서버를 구동 중입니다.
 
 ## 특징
 * **계정 불필요**
