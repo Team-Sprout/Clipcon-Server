@@ -4,7 +4,7 @@
 Global Clipboard는 다수의 사용자가 클립보드를 이용하여 데이터를 간편하게 주고 받을 수 있는 Server-Client
 구조의 데이터 전송 플랫폼입니다. 사용자는 클립보드를 이용한 복사, 붙여넣기 인터페이스와 이에 접근 가능한 단축키 (Ctrl C, Ctrl V)를 이용하여 다른 번거로운 과정 없이 간편하게 데이터를 주고 받을 수 있습니다. 따라서 다른 사용자가 복사한 데이터를 자신이 붙여넣는 것 처럼 사용할 수 있습니다. 클립보드를 이용하기 때문에 클립보드에 복사할 수 있는 모든 종류의 데이터(Text, Capture Image, File)를 전송할 수 있습니다.
 
-자세한 내용은 [Wiki](https://github.com/Team-Sprout/Clipcon-Server.wiki) 참조.
+자세한 내용은 [Wiki](https://github.com/Team-Sprout/Clipcon-Server/wiki) 참조.
 
 ## ClipCon
 ClipCon은 Global Clipboard에서 동작하는 클라이언트 어플리케이션의 이름입니다. 현재 본 프로젝트에서는 윈도우와 안드로이드에서 구동되는 어플리케이션을 개발하였습니다. ClipCon에 대한 자세한 내용은 다음을 참고하여 주시기 바랍니다.
